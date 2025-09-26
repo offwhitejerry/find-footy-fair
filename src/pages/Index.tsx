@@ -1,16 +1,43 @@
 import { useState } from "react";
-import { Search, Calendar, MapPin, Users } from "lucide-react";
+import { Search, Calendar, MapPin, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { useSeedSampleData } from "@/hooks/useEvents";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const seedMutation = useSeedSampleData();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // TODO: Navigate to results page
-      console.log("Searching for:", searchQuery);
+      const params = new URLSearchParams();
+      params.set('query', searchQuery);
+      if (location.trim()) {
+        params.set('location', location);
+      }
+      navigate(`/results?${params.toString()}`);
+    }
+  };
+
+  const handleSeedData = async () => {
+    try {
+      await seedMutation.mutateAsync();
+      toast({
+        title: "Sample data loaded",
+        description: "Football events and tickets have been added to the database.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load sample data. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -49,24 +76,53 @@ const Index = () => {
 
           {/* Search Form */}
           <form onSubmit={handleSearch} className="mb-12">
-            <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <Input
-                type="text"
-                placeholder="Search for teams, matches, leagues, or cities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-24 py-6 text-lg rounded-full border-2 focus:border-primary"
-              />
+            <div className="flex gap-4 max-w-4xl mx-auto">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  type="text"
+                  placeholder="Search for teams, matches, leagues..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 py-4 text-lg rounded-lg border-2 focus:border-primary"
+                />
+              </div>
+              <div className="flex-1 relative">
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  type="text"
+                  placeholder="City or venue..."
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="pl-12 py-4 text-lg rounded-lg border-2 focus:border-primary"
+                />
+              </div>
               <Button 
                 type="submit" 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full px-6"
+                className="px-8 py-4 text-lg rounded-lg"
                 disabled={!searchQuery.trim()}
               >
+                <Search className="h-5 w-5 mr-2" />
                 Search
               </Button>
             </div>
           </form>
+
+          {/* Sample Data Button */}
+          <div className="text-center mb-8">
+            <Button 
+              variant="outline" 
+              onClick={handleSeedData}
+              disabled={seedMutation.isPending}
+              className="gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              {seedMutation.isPending ? "Loading..." : "Load Sample Data"}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Click to populate with sample football events
+            </p>
+          </div>
 
           {/* Popular Searches */}
           <div className="mb-16">
