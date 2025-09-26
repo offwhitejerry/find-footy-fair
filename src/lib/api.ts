@@ -1,9 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// In Lovable, we don't use direct Supabase client in frontend
+// Instead, we use edge functions for all database operations
 
 export interface Event {
   id: string
@@ -68,31 +64,55 @@ export interface TicketFilters {
   limit?: number
 }
 
+// Base URL for edge functions - Lovable handles this automatically
+const FUNCTIONS_URL = '/api/functions/v1'
+
 export const api = {
   async searchEvents(params: SearchParams) {
-    const { data, error } = await supabase.functions.invoke('search-events', {
-      body: params
+    const response = await fetch(`${FUNCTIONS_URL}/search-events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
     })
     
-    if (error) throw error
-    return data
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    return await response.json()
   },
 
   async getEventTickets(filters: TicketFilters) {
-    const { data, error } = await supabase.functions.invoke('get-event-tickets', {
-      body: filters
+    const response = await fetch(`${FUNCTIONS_URL}/get-event-tickets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(filters),
     })
     
-    if (error) throw error
-    return data
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    return await response.json()
   },
 
   async seedSampleData() {
-    const { data, error } = await supabase.functions.invoke('seed-sample-data', {
-      body: {}
+    const response = await fetch(`${FUNCTIONS_URL}/seed-sample-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
     })
     
-    if (error) throw error
-    return data
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    return await response.json()
   }
 }
