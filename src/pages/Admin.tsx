@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, ExternalLink, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useGetClicks } from "@/hooks/useEvents";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
+import { site } from "@/config/site";
+import { setPageTitle } from "@/lib/head";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -14,6 +16,10 @@ const Admin = () => {
   const pageSize = 50;
   
   const { data, isLoading, error } = useGetClicks(pageSize, currentPage * pageSize);
+  
+  useEffect(() => {
+    setPageTitle("Admin Dashboard");
+  }, []);
   
   const formatPrice = (price: number, currency: string = "USD") => {
     return new Intl.NumberFormat("en-US", {
@@ -45,6 +51,32 @@ const Admin = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-6">
+          {/* Branding Section */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Branding</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-muted-foreground mb-1">App Name</div>
+                <div className="font-medium">{site.name}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground mb-1">Tagline</div>
+                <div className="font-medium">{site.tagline}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground mb-1">Domain</div>
+                <div className="font-medium">{site.domain}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground mb-1">Contact Email</div>
+                <div className="font-medium">{site.contactEmail}</div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              These values are read from environment variables (VITE_APP_NAME, VITE_APP_DOMAIN)
+            </p>
+          </Card>
+
           <div>
             <h1 className="text-3xl font-bold mb-2">Recent Clicks</h1>
             <p className="text-muted-foreground">

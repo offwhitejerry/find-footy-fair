@@ -1,8 +1,15 @@
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { site } from "@/config/site";
+import { setPageTitle } from "@/lib/head";
 
 const Terms = () => {
+  useEffect(() => {
+    setPageTitle("Terms of Service");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -13,7 +20,7 @@ const Terms = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-xl font-bold text-primary">FootyFare</h1>
+            <h1 className="text-xl font-bold text-primary">{site.name}</h1>
           </div>
         </div>
       </header>
@@ -31,13 +38,13 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Service Description</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare is a <strong>search and redirect service</strong>, not a ticket marketplace. 
+                {site.name} is a <strong>search and redirect service</strong>, not a ticket marketplace. 
                 We help you find and compare football ticket prices from authorized providers but 
                 do not sell tickets directly.
               </p>
               <p>
                 When you click "Buy on [Provider]", you are redirected to the provider's official 
-                website where the actual purchase takes place. FootyFare does not process payments 
+                website where the actual purchase takes place. {site.name} does not process payments 
                 or handle ticket fulfillment.
               </p>
             </div>
@@ -47,7 +54,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Acceptance of Terms</h2>
             <div className="space-y-4 text-sm">
               <p>
-                By using FootyFare, you agree to these Terms of Service. If you do not agree 
+                By using {site.name}, you agree to these Terms of Service. If you do not agree 
                 with any part of these terms, you may not use our service.
               </p>
               <p>
@@ -61,7 +68,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Pricing and Availability Disclaimer</h2>
             <div className="space-y-4 text-sm">
               <p>
-                <strong>IMPORTANT:</strong> Prices and availability shown on FootyFare are subject 
+                <strong>IMPORTANT:</strong> Prices and availability shown on {site.name} are subject 
                 to change without notice. We are not responsible for price discrepancies or 
                 ticket availability.
               </p>
@@ -78,7 +85,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Third-Party Providers</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare partners with authorized ticket providers. Each provider operates 
+                {site.name} partners with authorized ticket providers. Each provider operates 
                 independently with their own:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
@@ -90,7 +97,7 @@ const Terms = () => {
               </ul>
               <p>
                 <strong>By purchasing through a provider, you agree to their terms and conditions.</strong> 
-                FootyFare is not responsible for provider policies or service quality.
+                {site.name} is not responsible for provider policies or service quality.
               </p>
             </div>
           </Card>
@@ -99,7 +106,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">User Responsibilities</h2>
             <div className="space-y-4 text-sm">
               <p>
-                As a FootyFare user, you agree to:
+                As a {site.name} user, you agree to:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Use our service lawfully and responsibly</li>
@@ -116,7 +123,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Limitation of Liability</h2>
             <div className="space-y-4 text-sm">
               <p>
-                <strong>FootyFare provides information services only.</strong> We are not liable for:
+                <strong>{site.name} provides information services only.</strong> We are not liable for:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Ticket authenticity, validity, or delivery issues</li>
@@ -137,7 +144,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Affiliate Relationships</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare may earn commissions when you purchase tickets through our partner 
+                {site.name} may earn commissions when you purchase tickets through our partner 
                 providers. This affiliate relationship:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
@@ -153,7 +160,7 @@ const Terms = () => {
             <h2 className="text-xl font-semibold mb-4">Service Availability</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare strives to maintain service availability but cannot guarantee:
+                {site.name} strives to maintain service availability but cannot guarantee:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Uninterrupted access to our service</li>
@@ -184,8 +191,8 @@ const Terms = () => {
                 Questions about these Terms of Service:
               </p>
               <div className="space-y-2">
-                <p><strong>Email:</strong> legal@footyfare.com</p>
-                <p><strong>Support:</strong> help@footyfare.com</p>
+                <p><strong>Email:</strong> {site.contactEmail}</p>
+                <p><strong>Support:</strong> {site.contactEmail}</p>
               </div>
             </div>
           </Card>

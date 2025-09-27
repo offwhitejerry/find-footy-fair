@@ -1,8 +1,15 @@
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { site } from "@/config/site";
+import { setPageTitle } from "@/lib/head";
 
 const Legal = () => {
+  useEffect(() => {
+    setPageTitle("Legal Information");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -13,7 +20,7 @@ const Legal = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-xl font-bold text-primary">FootyFare</h1>
+            <h1 className="text-xl font-bold text-primary">{site.name}</h1>
           </div>
         </div>
       </header>
@@ -28,16 +35,16 @@ const Legal = () => {
           </div>
 
           <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">About FootyFare</h2>
+            <h2 className="text-xl font-semibold mb-4">About {site.name}</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare is a ticket comparison service that helps users find and compare 
+                {site.name} is a ticket comparison service that helps users find and compare 
                 football ticket prices from multiple authorized providers. We are not a 
                 ticket marketplace and do not sell tickets directly.
               </p>
               <p>
                 When you click "Buy on [Provider]", you are redirected to the official 
-                ticket provider's website where the actual purchase takes place. FootyFare 
+                ticket provider's website where the actual purchase takes place. {site.name} 
                 does not process payments or handle ticket fulfillment.
               </p>
             </div>
@@ -48,7 +55,7 @@ const Legal = () => {
             <div className="space-y-4 text-sm">
               <p>
                 <strong>Prices and availability are subject to change.</strong> The prices 
-                shown on FootyFare are provided by third-party ticket providers and may 
+                shown on {site.name} are provided by third-party ticket providers and may 
                 not reflect real-time availability or pricing.
               </p>
               <p>
@@ -68,7 +75,7 @@ const Legal = () => {
             <h2 className="text-xl font-semibold mb-4">Third-Party Providers</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare partners with authorized ticket resellers and primary ticket 
+                {site.name} partners with authorized ticket resellers and primary ticket 
                 providers including:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
@@ -90,7 +97,7 @@ const Legal = () => {
             <h2 className="text-xl font-semibold mb-4">Data and Privacy</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare collects minimal user data to improve our service. We track:
+                {site.name} collects minimal user data to improve our service. We track:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Search queries (to improve results)</li>
@@ -109,7 +116,7 @@ const Legal = () => {
             <h2 className="text-xl font-semibold mb-4">Affiliate Relationships</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare may earn a commission when you purchase tickets through our 
+                {site.name} may earn a commission when you purchase tickets through our 
                 partner providers. This does not affect the price you pay - commissions 
                 are paid by the provider.
               </p>
@@ -124,7 +131,7 @@ const Legal = () => {
             <h2 className="text-xl font-semibold mb-4">Limitation of Liability</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare provides information and comparison services only. We are not 
+                {site.name} provides information and comparison services only. We are not 
                 responsible for:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
@@ -145,11 +152,11 @@ const Legal = () => {
             <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
             <div className="space-y-4 text-sm">
               <p>
-                For questions about FootyFare or this legal notice:
+                For questions about {site.name} or this legal notice:
               </p>
               <div className="space-y-2">
-                <p><strong>Email:</strong> legal@footyfare.com</p>
-                <p><strong>Support:</strong> help@footyfare.com</p>
+                <p><strong>Email:</strong> {site.contactEmail}</p>
+                <p><strong>Support:</strong> {site.contactEmail}</p>
               </div>
               <p>
                 For issues with ticket purchases, please contact the provider directly 

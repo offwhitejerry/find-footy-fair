@@ -1,8 +1,15 @@
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { site } from "@/config/site";
+import { setPageTitle } from "@/lib/head";
 
 const Privacy = () => {
+  useEffect(() => {
+    setPageTitle("Privacy Policy");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -13,7 +20,7 @@ const Privacy = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-xl font-bold text-primary">FootyFare</h1>
+            <h1 className="text-xl font-bold text-primary">{site.name}</h1>
           </div>
         </div>
       </header>
@@ -31,7 +38,7 @@ const Privacy = () => {
             <h2 className="text-xl font-semibold mb-4">Information We Collect</h2>
             <div className="space-y-4 text-sm">
               <p>
-                FootyFare is a search and redirect service that helps you find football tickets. 
+                {site.name} is a search and redirect service that helps you find football tickets. 
                 We collect minimal information to provide our service:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
@@ -103,7 +110,7 @@ const Privacy = () => {
                 <li><strong>Opt-out:</strong> Disable cookies through your browser settings</li>
               </ul>
               <p>
-                To exercise these rights, contact us at privacy@footyfare.com
+                To exercise these rights, contact us at {site.contactEmail}
               </p>
             </div>
           </Card>
@@ -132,8 +139,8 @@ const Privacy = () => {
                 For privacy-related questions or to exercise your rights:
               </p>
               <div className="space-y-2">
-                <p><strong>Email:</strong> privacy@footyfare.com</p>
-                <p><strong>General Support:</strong> help@footyfare.com</p>
+                <p><strong>Email:</strong> {site.contactEmail}</p>
+                <p><strong>General Support:</strong> {site.contactEmail}</p>
               </div>
               <p>
                 We will respond to privacy requests within 30 days.

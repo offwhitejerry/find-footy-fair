@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Calendar, MapPin, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useSeedSampleData } from "@/hooks/useEvents";
 import { useToast } from "@/hooks/use-toast";
+import { site } from "@/config/site";
+import { setPageTitle } from "@/lib/head";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,6 +14,10 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const seedMutation = useSeedSampleData();
+
+  useEffect(() => {
+    setPageTitle();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +61,7 @@ const Index = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-primary">FootyFare</h1>
+            <h1 className="text-2xl font-bold text-primary">{site.name}</h1>
             <nav className="hidden md:flex items-center space-x-6">
               <a href="/legal" className="text-muted-foreground hover:text-foreground">Legal</a>
             </nav>
@@ -70,8 +76,7 @@ const Index = () => {
             Find the <span className="text-primary">Cheapest</span> Football Tickets
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Compare prices from multiple providers and find the best deals on football tickets. 
-            We search, you save.
+            {site.tagline}
           </p>
 
           {/* Search Form */}
@@ -178,10 +183,9 @@ const Index = () => {
         <footer className="mt-16 pt-8 border-t">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="font-semibold mb-4">FootyFare</h3>
+              <h3 className="font-semibold mb-4">{site.name}</h3>
               <p className="text-sm text-muted-foreground">
-                Find and compare football ticket prices from multiple providers.
-                We're a search service, not a marketplace.
+                {site.tagline} We're a search service, not a marketplace.
               </p>
             </div>
             <div>
@@ -232,7 +236,7 @@ const Index = () => {
           </div>
           <div className="mt-8 pt-8 border-t text-center">
             <p className="text-sm text-muted-foreground">
-              © 2024 FootyFare. All rights reserved.
+              © 2024 {site.name}. All rights reserved.
             </p>
           </div>
         </footer>
