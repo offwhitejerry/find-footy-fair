@@ -27,6 +27,31 @@ serve(async (req) => {
 
     const { query, location, dateFrom, dateTo, limit = 20 }: SearchParams = await req.json()
 
+    // Try SeatGeek first if API key is available
+    let seatgeekEvents = []
+    let seatgeekError = null
+    
+    try {
+      const seatgeekResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/seatgeek-adapter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+        },
+        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 2) })
+      })
+      
+      if (seatgeekResponse.ok) {
+        const seatgeekData = await seatgeekResponse.json()
+        if (seatgeekData.events && seatgeekData.provider_status === 'active') {
+          seatgeekEvents = seatgeekData.events
+        }
+      }
+    } catch (error) {
+      console.log('SeatGeek unavailable, using fallback')
+      seatgeekError = error
+    }
+
     // Build the search query
     let searchQuery = supabase
       .from('events')
@@ -98,6 +123,47 @@ serve(async (req) => {
       }
     }) || []
 
+    // Add mock events as fallback if no results
+    const mockEvents = processedEvents.length === 0 && seatgeekEvents.length === 0 ? [
+      {
+        id: 'mock-1',
+        external_id: 'mock-1',
+        home_team: 'Arsenal',
+        away_team: 'Chelsea',
+        venue: 'Emirates Stadium',
+        venue_address: 'London, UK',
+        event_date: new Date(Date.now() + 86400000 * 7).toISOString(), // Next week
+        competition: 'Premier League',
+        league: 'Premier League',
+        status: 'upcoming',
+        min_price: 45,
+        ticket_count: 8,
+        provider_summary: { 'Mock Provider': 8 },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 'mock-2',
+        external_id: 'mock-2',
+        home_team: 'Manchester United',
+        away_team: 'Liverpool',
+        venue: 'Old Trafford',
+        venue_address: 'Manchester, UK',
+        event_date: new Date(Date.now() + 86400000 * 14).toISOString(), // In 2 weeks
+        competition: 'Premier League',
+        league: 'Premier League',
+        status: 'upcoming',
+        min_price: 85,
+        ticket_count: 12,
+        provider_summary: { 'Mock Provider': 12 },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    ] : []
+
+    // Combine SeatGeek and database results, add mocks if needed
+    const allEvents = [...seatgeekEvents, ...processedEvents, ...mockEvents]
+
     // Log search for analytics
     if (query || location) {
       await supabase.from('search_history').insert({
@@ -112,8 +178,13 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        events: processedEvents,
-        total: processedEvents.length 
+        events: allEvents,
+        total: allEvents.length,
+        sources: {
+          seatgeek: seatgeekEvents.length,
+          database: processedEvents.length,
+          mock: mockEvents.length
+        }
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

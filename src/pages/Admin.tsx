@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 
 const Admin = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 50;
   
@@ -33,6 +35,10 @@ const Admin = () => {
               </Button>
               <h1 className="text-xl font-bold text-primary">Admin Dashboard</h1>
             </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/providers')}>
+              <Settings className="h-4 w-4 mr-2" />
+              Providers
+            </Button>
           </div>
         </div>
       </header>
