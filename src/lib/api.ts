@@ -64,6 +64,28 @@ export interface TicketFilters {
   limit?: number
 }
 
+export interface Click {
+  id: string
+  click_id: string
+  event_id?: string
+  provider_name: string
+  price_shown?: number
+  currency: string
+  provider_url?: string
+  clicked_at: string
+  user_agent?: string
+  referrer?: string
+}
+
+export interface LogClickParams {
+  click_id: string
+  event_id?: string
+  provider_name: string
+  price_shown?: number
+  currency?: string
+  provider_url: string
+}
+
 // Base URL for edge functions - Lovable handles this automatically
 const FUNCTIONS_URL = '/api/functions/v1'
 
@@ -107,6 +129,38 @@ export const api = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({}),
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    return await response.json()
+  },
+
+  async logClick(params: LogClickParams) {
+    const response = await fetch(`${FUNCTIONS_URL}/log-click`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    return await response.json()
+  },
+
+  async getClicks(limit = 100, offset = 0) {
+    const response = await fetch(`${FUNCTIONS_URL}/get-clicks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ limit, offset }),
     })
     
     if (!response.ok) {

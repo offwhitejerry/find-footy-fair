@@ -223,10 +223,11 @@ const Results = () => {
 
         {/* Legal Notice */}
         <div className="mt-8 p-4 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            Prices and availability may change. FootyFare compares prices from multiple providers 
-            to help you find the best deals. We redirect to official ticket providers - we don't sell tickets directly.
-          </p>
+            <p className="text-sm text-muted-foreground">
+              Prices and availability may change. FootyFare compares prices from multiple providers 
+              to help you find the best deals. We redirect to official ticket providers - we don't sell tickets directly.
+              When fees are not provided by the provider, we estimate typical fees and clearly mark them.
+            </p>
         </div>
       </main>
     </div>

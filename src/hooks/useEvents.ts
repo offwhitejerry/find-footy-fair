@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api, type SearchParams, type TicketFilters } from '@/lib/api'
+import { api, type SearchParams, type TicketFilters, type LogClickParams } from '@/lib/api'
 
 export const useSearchEvents = (params: SearchParams) => {
   return useQuery({
@@ -29,5 +29,19 @@ export const useSeedSampleData = () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       queryClient.invalidateQueries({ queryKey: ['tickets'] })
     }
+  })
+}
+
+export const useLogClick = () => {
+  return useMutation({
+    mutationFn: (params: LogClickParams) => api.logClick(params),
+  })
+}
+
+export const useGetClicks = (limit = 100, offset = 0) => {
+  return useQuery({
+    queryKey: ['clicks', limit, offset],
+    queryFn: () => api.getClicks(limit, offset),
+    staleTime: 1 * 60 * 1000, // 1 minute
   })
 }

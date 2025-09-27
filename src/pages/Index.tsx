@@ -173,6 +173,69 @@ const Index = () => {
             </div>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="font-semibold mb-4">FootyFare</h3>
+              <p className="text-sm text-muted-foreground">
+                Find and compare football ticket prices from multiple providers.
+                We're a search service, not a marketplace.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">Legal</h4>
+              <div className="space-y-2 text-sm">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate('/legal')}
+                >
+                  Legal Information
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate('/privacy')}
+                >
+                  Privacy Policy
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate('/terms')}
+                >
+                  Terms of Service
+                </Button>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">Admin</h4>
+              <div className="space-y-2 text-sm">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate('/admin')}
+                >
+                  View Clicks
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate('/settings')}
+                >
+                  Settings
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t text-center">
+            <p className="text-sm text-muted-foreground">
+              © 2024 FootyFare. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </main>
     </div>
   );
