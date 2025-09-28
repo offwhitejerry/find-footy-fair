@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { signOutAdmin } from "@/utils/adminAuth";
 import AdminMeta from "@/components/AdminMeta";
 import { toast } from "sonner";
-import { ticketmasterHealth } from "@/providers/ticketmaster";
+import { ticketmasterHealth } from "@/providers/ticketmasterHealth";
 
 const Providers = () => {
   const [seatgeekEnabled, setSeatgeekEnabled] = useState(true);
