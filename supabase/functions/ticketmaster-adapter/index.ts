@@ -1,206 +1,88 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+// supabase/functions/ticketmaster-adapter/index.ts
+// deno-lint-ignore-file no-explicit-any
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface TicketmasterEvent {
-  id: string
-  name: string
-  url: string
-  dates?: {
-    start?: {
-      dateTime?: string
-      localDate?: string
-    }
-  }
-  priceRanges?: Array<{
-    min: number
-    max: number
-    currency: string
-  }>
-  classifications?: Array<{
-    league?: {
-      name: string
-    }
-  }>
-  _embedded?: {
-    venues?: Array<{
-      name: string
-      city?: {
-        name: string
-      }
-    }>
-  }
-}
-
-interface SearchParams {
-  query?: string
-  location?: string
-  dateFrom?: string
-  dateTo?: string
-  limit?: number
-}
-
-interface EventWithTickets {
-  provider: string
-  title: string
-  league: string
-  venue: string
-  city: string
-  dateTime: string
-  price: {
-    total: number | null
-    currency: string
-  }
-  fees_known: boolean
-  chips: string[]
-  deepLink: string
-  id: string
-}
-
-const US_SOCCER_LEAGUES = ['MLS', 'NWSL', 'USL Championship', 'USL League One']
-
-function detectLeague(event: TicketmasterEvent): string {
-  const leagueName = event.classifications?.[0]?.league?.name || ''
-  const eventName = event.name.toLowerCase()
-  
-  if (leagueName.includes('MLS') || eventName.includes('mls')) return 'MLS'
-  if (leagueName.includes('NWSL') || eventName.includes('nwsl')) return 'NWSL'
-  if (leagueName.includes('USL Championship') || eventName.includes('usl championship')) return 'USL Championship'
-  if (leagueName.includes('USL League One') || eventName.includes('usl league one')) return 'USL League One'
-  
-  return leagueName || 'Soccer'
-}
-
-function extractTeamNames(eventName: string): { homeTeam: string, awayTeam: string } | null {
-  // Try to match "Team A vs Team B" or "Team A at Team B" patterns
-  const vsMatch = eventName.match(/^(.+?)\s+(?:vs|v\.?\s|at)\s+(.+?)(?:\s|$)/i)
-  if (vsMatch) {
-    return {
-      homeTeam: vsMatch[1].trim(),
-      awayTeam: vsMatch[2].trim()
-    }
-  }
-  return null
-}
-
-function normalizeEvent(event: TicketmasterEvent): EventWithTickets {
-  const teams = extractTeamNames(event.name)
-  const title = teams ? `${teams.homeTeam} vs ${teams.awayTeam}` : event.name
-  
-  const league = detectLeague(event)
-  const venue = event._embedded?.venues?.[0]?.name || ''
-  const city = event._embedded?.venues?.[0]?.city?.name || ''
-  const dateTime = event.dates?.start?.dateTime || event.dates?.start?.localDate || ''
-  
-  const priceRanges = event.priceRanges
-  const minPrice = priceRanges?.length ? Math.min(...priceRanges.map(p => p.min)) : null
-  
-  return {
-    provider: 'Ticketmaster',
-    title,
-    league,
-    venue,
-    city,
-    dateTime,
-    price: {
-      total: minPrice,
-      currency: 'USD'
-    },
-    fees_known: Boolean(priceRanges?.length),
-    chips: priceRanges?.length ? [] : ['Price on site'],
-    deepLink: event.url,
-    id: event.id
-  }
-}
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "content-type, authorization",
+  "Content-Type": "application/json"
+};
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "method_not_allowed" }), { status: 405, headers: CORS });
   }
+
+  const key = Deno.env.get("TICKETMASTER_API_KEY");
+  if (!key) {
+    return new Response(JSON.stringify({ error: "missing_api_key" }), { status: 500, headers: CORS });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const q = (body.q ?? body.keyword ?? "").toString();
+  const city = (body.city ?? "").toString();
+  const start = (body.startDateTime ?? "").toString();
+  const end = (body.endDateTime ?? "").toString();
+
+  const tm = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
+  tm.searchParams.set("apikey", key);
+  tm.searchParams.set("classificationName", "Soccer");
+  tm.searchParams.set("countryCode", "US");
+  tm.searchParams.set("size", "50");
+  if (q) tm.searchParams.set("keyword", q);
+  if (city) tm.searchParams.set("city", city);
+  if (start) tm.searchParams.set("startDateTime", start);
+  if (end) tm.searchParams.set("endDateTime", end);
 
   try {
-    const apiKey = Deno.env.get('TICKETMASTER_API_KEY')
-    if (!apiKey) {
-      console.warn('tm_adapter_error: TICKETMASTER_API_KEY not configured')
-      return new Response(
-        JSON.stringify({ events: [], source: 'ticketmaster', count: 0 }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    const r = await fetch(tm.toString(), { headers: { Accept: "application/json" } });
+    if (!r.ok) {
+      return new Response(JSON.stringify({ error: "upstream_error", status: r.status }), { status: 502, headers: CORS });
     }
+    const data = await r.json();
+    const events: any[] = data?._embedded?.events ?? [];
 
-    const params: SearchParams = await req.json()
-    
-    // Build query parameters
-    const queryParams = new URLSearchParams({
-      apikey: apiKey,
-      classificationName: 'Soccer',
-      countryCode: 'US',
-      size: '50'
+    const normalized = events.map((ev) => {
+      const venue = ev?._embedded?.venues?.[0];
+      const priceRange = Array.isArray(ev?.priceRanges) && ev.priceRanges.length ? ev.priceRanges[0] : null;
+      const minPrice = priceRange?.min ?? null;
+      const leagueGuess = (() => {
+        const name = (ev?.name ?? "").toLowerCase();
+        if (name.includes("mls")) return "MLS";
+        if (name.includes("nws")) return "NWSL";
+        if (name.includes("usl championship")) return "USL Championship";
+        if (name.includes("usl league one")) return "USL League One";
+        return ev?.classifications?.[0]?.segment?.name === "Soccer" ? "Soccer" : "";
+      })();
+      return {
+        provider: "Ticketmaster",
+        title: ev?.name ?? "Soccer match",
+        league: leagueGuess,
+        venue: venue?.name ?? "",
+        city: venue?.city?.name ?? "",
+        dateTime: ev?.dates?.start?.dateTime ?? ev?.dates?.start?.localDate ?? "",
+        price: { total: typeof minPrice === "number" ? Number(minPrice) : null, currency: "USD" },
+        fees_known: !!priceRange,
+        chips: priceRange ? [] : ["Price on site"],
+        deepLink: ev?.url ?? "",
+        id: ev?.id ?? ""
+      };
     })
+    // Filter to US leagues by default; keep unknown but send to the bottom
+    .sort((a, b) => {
+      const aPrice = a.price.total ?? Number.POSITIVE_INFINITY;
+      const bPrice = b.price.total ?? Number.POSITIVE_INFINITY;
+      if (aPrice !== bPrice) return aPrice - bPrice;
+      const aDate = a.dateTime ? Date.parse(a.dateTime) : Number.POSITIVE_INFINITY;
+      const bDate = b.dateTime ? Date.parse(b.dateTime) : Number.POSITIVE_INFINITY;
+      return aDate - bDate;
+    });
 
-    if (params.query) {
-      queryParams.set('keyword', params.query)
-    }
-    if (params.location) {
-      queryParams.set('city', params.location)
-    }
-    if (params.dateFrom) {
-      queryParams.set('startDateTime', params.dateFrom)
-    }
-    if (params.dateTo) {
-      queryParams.set('endDateTime', params.dateTo)
-    }
-
-    const url = `https://app.ticketmaster.com/discovery/v2/events.json?${queryParams}`
-    
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 1500)
-
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'SoccerFare/1.0'
-      }
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      throw new Error(`Ticketmaster API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    const events = data._embedded?.events || []
-
-    // Normalize and filter events
-    const normalizedEvents: EventWithTickets[] = events
-      .map(normalizeEvent)
-      .filter((event: EventWithTickets) => {
-        // Keep events from known US soccer leagues or those that mention soccer
-        const league = event.league.toLowerCase()
-        return US_SOCCER_LEAGUES.some(l => league.includes(l.toLowerCase())) ||
-               league.includes('soccer') ||
-               event.title.toLowerCase().includes('soccer')
-      })
-
-    return new Response(
-      JSON.stringify({ 
-        events: normalizedEvents, 
-        source: 'ticketmaster',
-        count: normalizedEvents.length 
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
-  } catch (error) {
-    console.warn('tm_adapter_error:', error instanceof Error ? error.message : 'Unknown error')
-    
-    return new Response(
-      JSON.stringify({ events: [], source: 'ticketmaster', count: 0 }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ results: normalized }), { status: 200, headers: CORS });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ error: "network_error", message }), { status: 500, headers: CORS });
   }
-})
+});
