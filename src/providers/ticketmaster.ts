@@ -29,33 +29,23 @@ export interface SearchParams {
   limit?: number
 }
 
-export async function fetchTicketmaster(params: TMParams) {
+export async function fetchTicketmaster(params: { q?: string; city?: string; startDateTime?: string; endDateTime?: string }) {
   const { data, error } = await supabase.functions.invoke("ticketmaster-adapter", { body: params });
-  if (error) return [];
+  if (error) throw new Error(`tm_invoke_error:${error.message || "unknown"}`);
   return (data?.results ?? []) as any[];
 }
 
 export async function searchTicketmaster(params: SearchParams): Promise<TicketmasterEvent[]> {
   try {
-    const response = await fetch('/api/functions/v1/ticketmaster-adapter', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        q: params.query,
-        city: params.location,
-        startDateTime: params.dateFrom,
-        endDateTime: params.dateTo
-      }),
-    });
+    const tmParams = {
+      q: params.query,
+      city: params.location,
+      startDateTime: params.dateFrom,
+      endDateTime: params.dateTo
+    };
     
-    if (!response.ok) {
-      throw new Error(`Ticketmaster adapter error: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    return (data?.results ?? []) as TicketmasterEvent[];
+    const results = await fetchTicketmaster(tmParams);
+    return results as TicketmasterEvent[];
   } catch (error) {
     console.warn('tm_adapter_error:', error instanceof Error ? error.message : 'Unknown error')
     // Show user-friendly toast for errors
@@ -64,33 +54,6 @@ export async function searchTicketmaster(params: SearchParams): Promise<Ticketma
       toast.warning("Ticketmaster temporarily unavailable—showing other sources");
     }
     return []
-  }
-}
-
-export async function ticketmasterHealth() {
-  const { data, error } = await supabase.functions.invoke("ticketmaster-health", { method: "GET" as any });
-  if (error) return { hasKey: false, ok: false };
-  return data as { hasKey: boolean; ok: boolean };
-}
-
-export async function ticketmasterHealthLegacy(): Promise<{ hasKey: boolean; ok: boolean }> {
-  try {
-    const response = await fetch('/api/functions/v1/ticketmaster-health', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (!response.ok) {
-      return { hasKey: false, ok: false };
-    }
-    
-    const data = await response.json();
-    return data as { hasKey: boolean; ok: boolean };
-  } catch (error) {
-    console.warn('Ticketmaster health check error:', error);
-    return { hasKey: false, ok: false };
   }
 }
 

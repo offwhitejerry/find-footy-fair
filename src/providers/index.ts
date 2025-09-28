@@ -38,7 +38,7 @@ export function getEnabledProviders(settings: ProviderSettings): Provider[] {
 }
 
 export async function searchAll(params: any) {
-  const [tm] = await Promise.all([ fetchTicketmaster(params) ]);
+  const [tm] = await Promise.all([fetchTicketmaster(params)]);
   const results = [...tm];
   results.sort((a:any,b:any)=>{
     const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
