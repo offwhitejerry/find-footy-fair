@@ -4,7 +4,6 @@ Find the cheapest soccer tickets across providers. We **do not** sell tickets or
 
 [![Live](https://img.shields.io/badge/live-soccerfare.com-blue)](https://soccerfare.com)
 [![Deploy-Vercel](https://img.shields.io/badge/deploy-Vercel-black)](https://vercel.com/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](#license)
 
 ## Live Site
 https://soccerfare.com
@@ -45,3 +44,7 @@ TICKETMASTER_API_KEY=
 SEATGEEK_API_KEY=
 TICKPICK_AFFILIATE_ID=
 GAMETIME_PARTNER_TOKEN=
+```
+
+## License
+All rights reserved. For permissions, contact hello@soccerfare.com.
