@@ -160,117 +160,41 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <footer className="mt-16 pt-8 border-t">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="font-semibold mb-4">{site.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {site.tagline ? `${site.tagline} ` : ""}We're a search service, not a marketplace.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium mb-4">Legal</h4>
-              <div className="space-y-2 text-sm">
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/legal')}
-                >
-                  Legal Information
-                </Button>
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/privacy')}
-                >
-                  Privacy Policy
-                </Button>
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/terms')}
-                >
-                  Terms of Service
-                </Button>
-              </div>
-            </div>
-            {isAdminVisible() && (
+        <footer className="border-t">
+          <div className="mx-auto max-w-6xl px-4 py-10">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {/* Brand / About */}
               <div>
-                <h4 className="font-medium mb-4 flex items-center gap-2">
-                  Admin
-                  <Lock className="h-3 w-3 text-muted-foreground" />
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                    onClick={() => navigate('/admin')}
-                  >
-                    View Clicks
-                  </Button>
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                    onClick={() => navigate('/content')}
-                  >
-                    Content
-                  </Button>
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                    onClick={() => navigate('/settings')}
-                  >
-                    Settings
-                  </Button>
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-destructive hover:text-destructive/80"
-                    onClick={signOutAdmin}
-                  >
-                    Sign Out Admin
-                  </Button>
-                </div>
+                <h3 className="text-sm font-semibold text-muted-foreground">About</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {site.name} is a soccer ticket meta-search. We compare prices and redirect you to the seller.
+                </p>
               </div>
-            )}
-            {(site.contactEmail || site.twitter || site.instagram) && (
-              <div>
-                <h4 className="font-medium mb-4">Connect</h4>
-                <div className="space-y-2 text-sm">
-                  {site.contactEmail && (
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                      onClick={() => window.location.href = `mailto:${site.contactEmail}`}
-                    >
-                      Contact Us
-                    </Button>
-                  )}
-                  {site.twitter && (
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                      onClick={() => window.open(site.twitter, '_blank')}
-                    >
-                      Twitter
-                    </Button>
-                  )}
-                  {site.instagram && (
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                      onClick={() => window.open(site.instagram, '_blank')}
-                    >
-                      Instagram
-                    </Button>
-                  )}
+
+              {/* Legal (vertical list) */}
+              <nav aria-labelledby="footer-legal">
+                <h3 id="footer-legal" className="text-sm font-semibold text-muted-foreground">Legal</h3>
+                <ul className="mt-2 space-y-2 text-sm">
+                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/legal">Legal</a></li>
+                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/privacy">Privacy</a></li>
+                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/terms">Terms</a></li>
+                </ul>
+              </nav>
+
+              {/* Contact (only if email exists) */}
+              {site.contactEmail && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground">Contact</h3>
+                  <div className="mt-2 text-sm">
+                    <a className="text-muted-foreground hover:text-foreground hover:underline" href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="mt-8 pt-8 border-t text-center">
-            <p className="text-sm text-muted-foreground">
-              © 2024 {site.name}. All rights reserved.
-            </p>
+              )}
+            </div>
+
+            <div className="mt-8 border-t pt-6 text-xs text-muted-foreground">
+              © {new Date().getFullYear()} {site.name}. All rights reserved.
+            </div>
           </div>
         </footer>
       </main>
