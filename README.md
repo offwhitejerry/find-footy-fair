@@ -22,8 +22,7 @@ https://soccerfare.com
 - Deployed on Vercel
 
 ## Preview
-<!-- Replace with a real screenshot or OG image -->
-![SoccerFare screenshot](./public/og.jpg)
+![SoccerFare screenshot](./public/og.png)
 
 ## Environment Variables
 Public keys must start with `VITE_`. Create a `.env` locally or set them in your host.
