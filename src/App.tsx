@@ -10,9 +10,10 @@ import Legal from "./pages/Legal";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Admin from "./pages/Admin";
+import AdminClicks from "./pages/AdminClicks";
+import AdminSettings from "./pages/AdminSettings";
 import Content from "./pages/Content";
 import Providers from "./pages/Providers";
-import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import AdminGate from "./components/AdminGate";
 
@@ -32,9 +33,10 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/admin" element={<AdminGate><Admin /></AdminGate>} />
-          <Route path="/content" element={<Content />} />
+          <Route path="/admin/clicks" element={<AdminGate><AdminClicks /></AdminGate>} />
           <Route path="/admin/providers" element={<AdminGate><Providers /></AdminGate>} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/admin/settings" element={<AdminGate><AdminSettings /></AdminGate>} />
+          <Route path="/content" element={<Content />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
