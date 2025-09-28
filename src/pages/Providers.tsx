@@ -13,6 +13,7 @@ import { ticketmasterHealth } from "@/providers/ticketmaster";
 const Providers = () => {
   const [seatgeekEnabled, setSeatgeekEnabled] = useState(true);
   const [ticketmasterEnabled, setTicketmasterEnabled] = useState(false);
+  const [tmHealth, setTmHealth] = useState<{hasKey:boolean; ok:boolean} | null>(null);
   const [providerStatus, setProviderStatus] = useState({
     seatgeek: 'checking',
     ticketmaster: 'checking',
@@ -50,6 +51,7 @@ const Providers = () => {
     const checkTicketmasterStatus = async () => {
       try {
         const health = await ticketmasterHealth();
+        setTmHealth(health);
         
         if (health.hasKey && health.ok) {
           setProviderStatus(prev => ({ ...prev, ticketmaster: 'active' }));
@@ -60,6 +62,7 @@ const Providers = () => {
         }
       } catch (error) {
         console.warn('Ticketmaster health check error:', error);
+        setTmHealth({ hasKey: false, ok: false });
         setProviderStatus(prev => ({ ...prev, ticketmaster: 'error' }));
       }
     };
@@ -222,27 +225,26 @@ const Providers = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Badge variant={getStatusColor(providerStatus.ticketmaster)}>
-                    {getStatusText(providerStatus.ticketmaster)}
-                  </Badge>
+                  {tmHealth?.hasKey ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-xs">Key detected</span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-100 text-rose-700 text-xs">Key missing</span>
+                  )}
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="ticketmaster-toggle"
-                      checked={ticketmasterEnabled && providerStatus.ticketmaster === 'active'}
+                      checked={ticketmasterEnabled}
                       onCheckedChange={setTicketmasterEnabled}
-                      disabled={providerStatus.ticketmaster === 'missing_key'}
                     />
                     <Label htmlFor="ticketmaster-toggle">Enable</Label>
                   </div>
                 </div>
               </div>
               
-              {providerStatus.ticketmaster === 'missing_key' && (
-                <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                  <p className="text-sm text-destructive">
-                    <strong>Configuration Required:</strong> Add TICKETMASTER_API_KEY to your environment variables to enable this provider.
-                  </p>
-                </div>
+              {!tmHealth?.hasKey && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add <code>TICKETMASTER_API_KEY</code> in Supabase secrets and redeploy the functions.
+                </p>
               )}
               
               <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
