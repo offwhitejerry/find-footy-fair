@@ -7,7 +7,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { signOutAdmin } from "@/utils/adminAuth";
 import AdminMeta from "@/components/AdminMeta";
-import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { ticketmasterHealth } from "@/providers/ticketmaster";
 
