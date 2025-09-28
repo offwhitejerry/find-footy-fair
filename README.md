@@ -18,7 +18,7 @@ https://soccerfare.com
 
 ## Tech
 - Vite + React + TypeScript + Tailwind + shadcn/ui  
-- (Optional) Supabase/edge functions for logging  
+- Supabase/edge functions for logging  
 - Deployed on Vercel
 
 ## Preview
