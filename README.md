@@ -1,73 +1,40 @@
-# Welcome to your Lovable project
+# SoccerFare — Soccer Ticket Meta-Search (Compare → Redirect)
 
-## Project info
+Find the cheapest soccer tickets across providers. We **do not** sell tickets or take payment. We compare prices then **redirect** you to the seller's website.
 
-**URL**: https://lovable.dev/projects/c23cf950-080c-4eb4-bc93-b73753aaa009
+**Live site:** https://soccerfare.com
 
-## How can I edit this code?
+## What it does
+- Search MLS / USL Championship / USL League One / NWSL matches  
+- Normalize listings across partners  
+- Show all-in prices when provided; otherwise label **Fees estimated**  
+- **Redirect-only** checkout (no payments here)  
+- `subid` click tracking for attribution
 
-There are several ways of editing your application.
+## Tech
+- Vite + React + TypeScript + Tailwind + shadcn/ui  
+- (Optional) Supabase/edge functions for logging  
+- Deployed on Vercel
 
-**Use Lovable**
+## Environment variables
+Public keys must start with `VITE_`. Create a `.env` locally or set in your host.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c23cf950-080c-4eb4-bc93-b73753aaa009) and start prompting.
+```env
+# branding (public)
+VITE_APP_NAME=SoccerFare
+VITE_APP_DOMAIN=https://soccerfare.com
+VITE_CONTACT_EMAIL=hello@soccerfare.com
+VITE_AFFILIATE_SUBID_PARAM=subid
 
-Changes made via Lovable will be committed automatically to this repo.
+# feature flags (public)
+VITE_SHOW_POPULAR=true
+VITE_ENABLE_SAMPLE_DATA=false
+VITE_SHOW_ADMIN=false
+VITE_ADMIN_PASSCODE_HASH=   # sha256 hex of your passphrase (no plain text)
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# providers (server-side usage only)
+TICKETMASTER_API_KEY=
+SEATGEEK_API_KEY=
+TICKPICK_AFFILIATE_ID=
+GAMETIME_PARTNER_TOKEN=
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c23cf950-080c-4eb4-bc93-b73753aaa009) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
