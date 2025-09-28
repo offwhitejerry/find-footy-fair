@@ -184,40 +184,36 @@ const Terms = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-            <div className="space-y-4 text-sm">
-              <p>
-                Questions about these Terms of Service:
-              </p>
-              <div className="space-y-2">
-                {site.contactEmail ? (
-                  <>
-                    <p>
-                      <strong>Email:</strong>{' '}
-                      <a 
-                        href={`mailto:${site.contactEmail}`}
-                        className="text-primary hover:underline"
-                      >
-                        {site.contactEmail}
-                      </a>
-                    </p>
-                    <p>
-                      <strong>Support:</strong>{' '}
-                      <a 
-                        href={`mailto:${site.contactEmail}`}
-                        className="text-primary hover:underline"
-                      >
-                        {site.contactEmail}
-                      </a>
-                    </p>
-                  </>
-                ) : (
-                  <p>Contact information will be added soon.</p>
-                )}
+          {site.contactEmail && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+              <div className="space-y-4 text-sm">
+                <p>
+                  Questions about these Terms of Service:
+                </p>
+                <div className="space-y-2">
+                  <p>
+                    <strong>Email:</strong>{' '}
+                    <a 
+                      href={`mailto:${site.contactEmail}`}
+                      className="text-primary hover:underline"
+                    >
+                      {site.contactEmail}
+                    </a>
+                  </p>
+                  <p>
+                    <strong>Support:</strong>{' '}
+                    <a 
+                      href={`mailto:${site.contactEmail}`}
+                      className="text-primary hover:underline"
+                    >
+                      {site.contactEmail}
+                    </a>
+                  </p>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
         </div>
       </main>
     </div>

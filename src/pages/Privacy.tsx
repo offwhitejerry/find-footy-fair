@@ -109,21 +109,17 @@ const Privacy = () => {
                 <li><strong>Deletion:</strong> Request deletion of your data (subject to legal obligations)</li>
                 <li><strong>Opt-out:</strong> Disable cookies through your browser settings</li>
               </ul>
-              <p>
-                To exercise these rights, {site.contactEmail ? (
-                  <>
-                    contact us at{' '}
-                    <a 
-                      href={`mailto:${site.contactEmail}`}
-                      className="text-primary hover:underline"
-                    >
-                      {site.contactEmail}
-                    </a>
-                  </>
-                ) : (
-                  "contact information will be added soon."
-                )}
-              </p>
+              {site.contactEmail && (
+                <p>
+                  To exercise these rights, contact us at{' '}
+                  <a 
+                    href={`mailto:${site.contactEmail}`}
+                    className="text-primary hover:underline"
+                  >
+                    {site.contactEmail}
+                  </a>
+                </p>
+              )}
             </div>
           </Card>
 
@@ -144,43 +140,39 @@ const Privacy = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Contact Us</h2>
-            <div className="space-y-4 text-sm">
-              <p>
-                For privacy-related questions or to exercise your rights:
-              </p>
-              <div className="space-y-2">
-                {site.contactEmail ? (
-                  <>
-                    <p>
-                      <strong>Email:</strong>{' '}
-                      <a 
-                        href={`mailto:${site.contactEmail}`}
-                        className="text-primary hover:underline"
-                      >
-                        {site.contactEmail}
-                      </a>
-                    </p>
-                    <p>
-                      <strong>General Support:</strong>{' '}
-                      <a 
-                        href={`mailto:${site.contactEmail}`}
-                        className="text-primary hover:underline"
-                      >
-                        {site.contactEmail}
-                      </a>
-                    </p>
-                  </>
-                ) : (
-                  <p>Contact information will be added soon.</p>
-                )}
+          {site.contactEmail && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Contact Us</h2>
+              <div className="space-y-4 text-sm">
+                <p>
+                  For privacy-related questions or to exercise your rights:
+                </p>
+                <div className="space-y-2">
+                  <p>
+                    <strong>Email:</strong>{' '}
+                    <a 
+                      href={`mailto:${site.contactEmail}`}
+                      className="text-primary hover:underline"
+                    >
+                      {site.contactEmail}
+                    </a>
+                  </p>
+                  <p>
+                    <strong>General Support:</strong>{' '}
+                    <a 
+                      href={`mailto:${site.contactEmail}`}
+                      className="text-primary hover:underline"
+                    >
+                      {site.contactEmail}
+                    </a>
+                  </p>
+                </div>
+                <p>
+                  We will respond to privacy requests within 30 days.
+                </p>
               </div>
-              <p>
-                We will respond to privacy requests within 30 days.
-              </p>
-            </div>
-          </Card>
+            </Card>
+          )}
         </div>
       </main>
     </div>
