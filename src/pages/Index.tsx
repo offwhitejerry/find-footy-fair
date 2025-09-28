@@ -171,13 +171,13 @@ const Index = () => {
                 </p>
               </div>
 
-              {/* Legal (vertical list) */}
-              <nav aria-labelledby="footer-legal">
-                <h3 id="footer-legal" className="text-sm font-semibold text-muted-foreground">Legal</h3>
+              {/* Policies (vertical list) */}
+              <nav aria-labelledby="footer-policies">
+                <h3 id="footer-policies" className="text-sm font-semibold text-muted-foreground">Policies</h3>
                 <ul className="mt-2 space-y-2 text-sm">
-                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/legal">Legal</a></li>
-                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/privacy">Privacy</a></li>
-                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/terms">Terms</a></li>
+                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/privacy">Privacy Policy</a></li>
+                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/terms">Terms of Use</a></li>
+                  <li><a className="text-muted-foreground hover:text-foreground hover:underline" href="/legal">Legal Notice</a></li>
                 </ul>
               </nav>
 
