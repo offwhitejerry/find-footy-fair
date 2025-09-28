@@ -110,7 +110,7 @@ const Privacy = () => {
                 <li><strong>Opt-out:</strong> Disable cookies through your browser settings</li>
               </ul>
               <p>
-                To exercise these rights, contact us at {site.contactEmail}
+                To exercise these rights, {site.contactEmail ? `contact us at ${site.contactEmail}` : "contact information will be added soon."}
               </p>
             </div>
           </Card>
@@ -139,8 +139,14 @@ const Privacy = () => {
                 For privacy-related questions or to exercise your rights:
               </p>
               <div className="space-y-2">
-                <p><strong>Email:</strong> {site.contactEmail}</p>
-                <p><strong>General Support:</strong> {site.contactEmail}</p>
+                {site.contactEmail ? (
+                  <>
+                    <p><strong>Email:</strong> {site.contactEmail}</p>
+                    <p><strong>General Support:</strong> {site.contactEmail}</p>
+                  </>
+                ) : (
+                  <p>Contact information will be added soon.</p>
+                )}
               </div>
               <p>
                 We will respond to privacy requests within 30 days.

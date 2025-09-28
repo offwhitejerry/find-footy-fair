@@ -60,20 +60,36 @@ const Admin = () => {
                 <div className="font-medium">{site.name}</div>
               </div>
               <div>
-                <div className="text-muted-foreground mb-1">Tagline</div>
-                <div className="font-medium">{site.tagline}</div>
-              </div>
-              <div>
                 <div className="text-muted-foreground mb-1">Domain</div>
                 <div className="font-medium">{site.domain}</div>
               </div>
               <div>
+                <div className="text-muted-foreground mb-1">Tagline</div>
+                <div className="font-medium">
+                  {site.tagline || <Badge variant="outline">not set</Badge>}
+                </div>
+              </div>
+              <div>
                 <div className="text-muted-foreground mb-1">Contact Email</div>
-                <div className="font-medium">{site.contactEmail}</div>
+                <div className="font-medium">
+                  {site.contactEmail || <Badge variant="outline">not set</Badge>}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground mb-1">Twitter</div>
+                <div className="font-medium">
+                  {site.twitter || <Badge variant="outline">not set</Badge>}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground mb-1">Instagram</div>
+                <div className="font-medium">
+                  {site.instagram || <Badge variant="outline">not set</Badge>}
+                </div>
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-4">
-              These values are read from environment variables (VITE_APP_NAME, VITE_APP_DOMAIN)
+              Required: VITE_APP_NAME, VITE_APP_DOMAIN. Optional: VITE_TAGLINE, VITE_CONTACT_EMAIL, VITE_TWITTER, VITE_INSTAGRAM
             </p>
           </Card>
 

@@ -1,7 +1,11 @@
 import { site } from "@/config/site";
 
 export const setPageTitle = (pageTitle?: string) => {
-  const title = pageTitle ? `${pageTitle} • ${site.name}` : `${site.name} — ${site.tagline}`;
+  const title = pageTitle 
+    ? `${pageTitle} • ${site.name}` 
+    : site.tagline 
+      ? `${site.name} — ${site.tagline}`
+      : site.name;
   document.title = title;
   
   // Update Open Graph title
@@ -20,7 +24,7 @@ export const setPageTitle = (pageTitle?: string) => {
 export const updateMetaTags = () => {
   // Update description
   const description = document.querySelector('meta[name="description"]');
-  if (description) {
+  if (description && site.tagline) {
     description.setAttribute('content', site.tagline);
   }
   
@@ -32,7 +36,7 @@ export const updateMetaTags = () => {
   
   // Update Open Graph tags
   const ogDescription = document.querySelector('meta[property="og:description"]');
-  if (ogDescription) {
+  if (ogDescription && site.tagline) {
     ogDescription.setAttribute('content', site.tagline);
   }
   
@@ -48,7 +52,7 @@ export const updateMetaTags = () => {
   
   // Update Twitter tags
   const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-  if (twitterDescription) {
+  if (twitterDescription && site.tagline) {
     twitterDescription.setAttribute('content', site.tagline);
   }
   

@@ -75,9 +75,11 @@ const Index = () => {
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
             Find the <span className="text-primary">Cheapest</span> Football Tickets
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            {site.tagline}
-          </p>
+          {site.tagline && (
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              {site.tagline}
+            </p>
+          )}
 
           {/* Search Form */}
           <form onSubmit={handleSearch} className="mb-12">
@@ -185,7 +187,7 @@ const Index = () => {
             <div>
               <h3 className="font-semibold mb-4">{site.name}</h3>
               <p className="text-sm text-muted-foreground">
-                {site.tagline} We're a search service, not a marketplace.
+                {site.tagline ? `${site.tagline} ` : ""}We're a search service, not a marketplace.
               </p>
             </div>
             <div>
@@ -233,6 +235,40 @@ const Index = () => {
                 </Button>
               </div>
             </div>
+            {(site.contactEmail || site.twitter || site.instagram) && (
+              <div>
+                <h4 className="font-medium mb-4">Connect</h4>
+                <div className="space-y-2 text-sm">
+                  {site.contactEmail && (
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                      onClick={() => window.location.href = `mailto:${site.contactEmail}`}
+                    >
+                      Contact Us
+                    </Button>
+                  )}
+                  {site.twitter && (
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                      onClick={() => window.open(site.twitter, '_blank')}
+                    >
+                      Twitter
+                    </Button>
+                  )}
+                  {site.instagram && (
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                      onClick={() => window.open(site.instagram, '_blank')}
+                    >
+                      Instagram
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <div className="mt-8 pt-8 border-t text-center">
             <p className="text-sm text-muted-foreground">

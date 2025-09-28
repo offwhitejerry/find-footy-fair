@@ -191,8 +191,14 @@ const Terms = () => {
                 Questions about these Terms of Service:
               </p>
               <div className="space-y-2">
-                <p><strong>Email:</strong> {site.contactEmail}</p>
-                <p><strong>Support:</strong> {site.contactEmail}</p>
+                {site.contactEmail ? (
+                  <>
+                    <p><strong>Email:</strong> {site.contactEmail}</p>
+                    <p><strong>Support:</strong> {site.contactEmail}</p>
+                  </>
+                ) : (
+                  <p>Contact information will be added soon.</p>
+                )}
               </div>
             </div>
           </Card>
