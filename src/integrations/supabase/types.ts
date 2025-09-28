@@ -14,7 +14,251 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clicks: {
+        Row: {
+          click_id: string
+          clicked_at: string
+          currency: string | null
+          event_id: string | null
+          id: string
+          price_shown: number | null
+          provider_name: string
+          provider_url: string | null
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          click_id: string
+          clicked_at?: string
+          currency?: string | null
+          event_id?: string | null
+          id?: string
+          price_shown?: number | null
+          provider_name: string
+          provider_url?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          click_id?: string
+          clicked_at?: string
+          currency?: string | null
+          event_id?: string | null
+          id?: string
+          price_shown?: number | null
+          provider_name?: string
+          provider_url?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clicks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          away_team: string
+          competition: string | null
+          created_at: string
+          event_date: string
+          external_id: string
+          home_team: string
+          id: string
+          image_url: string | null
+          league: string | null
+          max_price: number | null
+          min_price: number | null
+          status: string
+          total_tickets: number | null
+          updated_at: string
+          venue: string
+          venue_address: string | null
+        }
+        Insert: {
+          away_team: string
+          competition?: string | null
+          created_at?: string
+          event_date: string
+          external_id: string
+          home_team: string
+          id?: string
+          image_url?: string | null
+          league?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          status?: string
+          total_tickets?: number | null
+          updated_at?: string
+          venue: string
+          venue_address?: string | null
+        }
+        Update: {
+          away_team?: string
+          competition?: string | null
+          created_at?: string
+          event_date?: string
+          external_id?: string
+          home_team?: string
+          id?: string
+          image_url?: string | null
+          league?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          status?: string
+          total_tickets?: number | null
+          updated_at?: string
+          venue?: string
+          venue_address?: string | null
+        }
+        Relationships: []
+      }
+      providers: {
+        Row: {
+          api_endpoint: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          reliability_score: number | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          reliability_score?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          reliability_score?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      search_history: {
+        Row: {
+          created_at: string
+          date_from: string | null
+          date_to: string | null
+          id: string
+          location: string | null
+          results_count: number | null
+          search_query: string
+          user_ip: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          id?: string
+          location?: string | null
+          results_count?: number | null
+          search_query: string
+          user_ip?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          id?: string
+          location?: string | null
+          results_count?: number | null
+          search_query?: string
+          user_ip?: string | null
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          created_at: string
+          currency: string
+          delivery_info: string | null
+          delivery_type: string | null
+          event_id: string
+          external_ticket_id: string | null
+          fees: number | null
+          id: string
+          is_available: boolean
+          last_updated: string
+          price: number
+          provider_id: string
+          row_info: string | null
+          seat_info: string | null
+          section: string | null
+          ticket_url: string | null
+          total_price: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          delivery_info?: string | null
+          delivery_type?: string | null
+          event_id: string
+          external_ticket_id?: string | null
+          fees?: number | null
+          id?: string
+          is_available?: boolean
+          last_updated?: string
+          price: number
+          provider_id: string
+          row_info?: string | null
+          seat_info?: string | null
+          section?: string | null
+          ticket_url?: string | null
+          total_price: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          delivery_info?: string | null
+          delivery_type?: string | null
+          event_id?: string
+          external_ticket_id?: string | null
+          fees?: number | null
+          id?: string
+          is_available?: boolean
+          last_updated?: string
+          price?: number
+          provider_id?: string
+          row_info?: string | null
+          seat_info?: string | null
+          section?: string | null
+          ticket_url?: string | null
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
