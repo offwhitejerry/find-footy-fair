@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, MapPin, Clock, Calendar, Star, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLogClick } from "@/hooks/useEvents";
 import { generateUUID, appendSubIdToUrl } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { site } from "@/config/site";
+import { setPageTitle } from "@/lib/head";
 
 // Mock data - will be replaced with API calls
 const mockEvent = {
@@ -60,6 +62,10 @@ const mockCheapestOptions = [
 
 const Event = () => {
   const logClick = useLogClick();
+
+  useEffect(() => {
+    setPageTitle(`${mockEvent.homeTeam} vs ${mockEvent.awayTeam}`);
+  }, []);
   
   const handleBuyClick = async (option: any) => {
     const clickId = generateUUID();
@@ -127,7 +133,7 @@ const Event = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <h1 className="text-xl font-bold text-primary">FootyFare</h1>
+              <h1 className="text-xl font-bold text-primary">{site.name}</h1>
             </div>
             <Button>
               View All Tickets
