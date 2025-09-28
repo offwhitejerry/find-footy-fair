@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Lock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { signOutAdmin } from "@/utils/adminAuth";
+import AdminMeta from "@/components/AdminMeta";
 
 const Providers = () => {
   const [seatgeekEnabled, setSeatgeekEnabled] = useState(true);
@@ -90,6 +92,7 @@ const Providers = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminMeta />
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
@@ -99,8 +102,15 @@ const Providers = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <h1 className="text-xl font-bold text-primary">Provider Management</h1>
+              <h1 className="text-xl font-bold text-primary flex items-center gap-2">
+                Provider Management
+                <Lock className="h-4 w-4" />
+              </h1>
             </div>
+            <Button variant="ghost" size="sm" onClick={signOutAdmin} className="text-destructive hover:text-destructive">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>

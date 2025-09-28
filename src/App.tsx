@@ -14,6 +14,7 @@ import Content from "./pages/Content";
 import Providers from "./pages/Providers";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import AdminGate from "./components/AdminGate";
 
 const queryClient = new QueryClient();
 
@@ -30,9 +31,9 @@ const App = () => (
           <Route path="/legal" element={<Legal />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<AdminGate><Admin /></AdminGate>} />
           <Route path="/content" element={<Content />} />
-          <Route path="/admin/providers" element={<Providers />} />
+          <Route path="/admin/providers" element={<AdminGate><Providers /></AdminGate>} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

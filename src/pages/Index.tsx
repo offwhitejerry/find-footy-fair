@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Search, Calendar, MapPin, Users } from "lucide-react";
+import { Search, Calendar, MapPin, Users, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { site } from "@/config/site";
 import { setPageTitle } from "@/lib/head";
 import popularUsData from "@/data/popular-us.json";
+import { isAdminVisible, signOutAdmin } from "@/utils/adminAuth";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -193,32 +194,44 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            <div>
-              <h4 className="font-medium mb-4">Admin</h4>
-              <div className="space-y-2 text-sm">
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/admin')}
-                >
-                  View Clicks
-                </Button>
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/content')}
-                >
-                  Content
-                </Button>
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/settings')}
-                >
-                  Settings
-                </Button>
+            {isAdminVisible() && (
+              <div>
+                <h4 className="font-medium mb-4 flex items-center gap-2">
+                  Admin
+                  <Lock className="h-3 w-3 text-muted-foreground" />
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                    onClick={() => navigate('/admin')}
+                  >
+                    View Clicks
+                  </Button>
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                    onClick={() => navigate('/content')}
+                  >
+                    Content
+                  </Button>
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                    onClick={() => navigate('/settings')}
+                  >
+                    Settings
+                  </Button>
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-destructive hover:text-destructive/80"
+                    onClick={signOutAdmin}
+                  >
+                    Sign Out Admin
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
             {(site.contactEmail || site.twitter || site.instagram) && (
               <div>
                 <h4 className="font-medium mb-4">Connect</h4>

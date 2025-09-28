@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ExternalLink, Settings, Sparkles } from "lucide-react";
+import { ArrowLeft, ExternalLink, Settings, Sparkles, Lock, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,6 +10,8 @@ import { formatDistanceToNow } from "date-fns";
 import { site } from "@/config/site";
 import { setPageTitle } from "@/lib/head";
 import { useToast } from "@/hooks/use-toast";
+import { signOutAdmin } from "@/utils/adminAuth";
+import AdminMeta from "@/components/AdminMeta";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -52,6 +54,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminMeta />
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
@@ -61,12 +64,21 @@ const Admin = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <h1 className="text-xl font-bold text-primary">Admin Dashboard</h1>
+              <h1 className="text-xl font-bold text-primary flex items-center gap-2">
+                Admin Dashboard
+                <Lock className="h-4 w-4" />
+              </h1>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/admin/providers')}>
-              <Settings className="h-4 w-4 mr-2" />
-              Providers
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/providers')}>
+                <Settings className="h-4 w-4 mr-2" />
+                Providers
+              </Button>
+              <Button variant="ghost" size="sm" onClick={signOutAdmin} className="text-destructive hover:text-destructive">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
