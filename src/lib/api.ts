@@ -169,5 +169,21 @@ export const api = {
     }
     
     return await response.json()
+  },
+
+  async callTicketmasterAdapter(params: SearchParams) {
+    const response = await fetch(`${FUNCTIONS_URL}/ticketmaster-adapter`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Ticketmaster adapter failed: ${response.status}`)
+    }
+    
+    return await response.json()
   }
 }

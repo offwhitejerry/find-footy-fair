@@ -43,7 +43,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
         },
-        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 2), league })
+        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 3), league })
       })
       
       if (seatgeekResponse.ok) {
@@ -55,6 +55,31 @@ serve(async (req) => {
     } catch (error) {
       console.log('SeatGeek unavailable, using fallback')
       seatgeekError = error
+    }
+
+    // Try Ticketmaster if API key is available
+    let ticketmasterEvents = []
+    let ticketmasterError = null
+    
+    try {
+      const ticketmasterResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ticketmaster-adapter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+        },
+        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 3), league })
+      })
+      
+      if (ticketmasterResponse.ok) {
+        const ticketmasterData = await ticketmasterResponse.json()
+        if (ticketmasterData.events) {
+          ticketmasterEvents = ticketmasterData.events
+        }
+      }
+    } catch (error) {
+      console.log('Ticketmaster unavailable, using fallback')
+      ticketmasterError = error
     }
 
     // Build the search query
@@ -137,7 +162,7 @@ serve(async (req) => {
     }) || []
 
     // Add mock events as fallback if no results
-    const mockEvents = processedEvents.length === 0 && seatgeekEvents.length === 0 ? [
+    const mockEvents = processedEvents.length === 0 && seatgeekEvents.length === 0 && ticketmasterEvents.length === 0 ? [
       {
         id: 'mock-1',
         external_id: 'mock-1',
@@ -174,8 +199,33 @@ serve(async (req) => {
       }
     ] : []
 
-    // Combine SeatGeek and database results, add mocks if needed
-    const allEvents = [...seatgeekEvents, ...processedEvents, ...mockEvents]
+    // Combine all provider results, add mocks if needed
+    const allEvents = [...seatgeekEvents, ...ticketmasterEvents, ...processedEvents, ...mockEvents]
+
+    // Sort events by price and date
+    const sortedEvents = allEvents.sort((a, b) => {
+      // First sort by price (nulls last)
+      if (a.price?.total !== null && b.price?.total !== null) {
+        const priceDiff = a.price.total - b.price.total
+        if (priceDiff !== 0) return priceDiff
+      } else if (a.min_price !== null && b.min_price !== null) {
+        const priceDiff = a.min_price - b.min_price
+        if (priceDiff !== 0) return priceDiff
+      } else if ((a.price?.total || a.min_price) !== null && (b.price?.total || b.min_price) === null) {
+        return -1
+      } else if ((a.price?.total || a.min_price) === null && (b.price?.total || b.min_price) !== null) {
+        return 1
+      }
+      
+      // Then sort by date
+      const aDate = new Date(a.dateTime || a.event_date)
+      const bDate = new Date(b.dateTime || b.event_date)
+      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return aDate.getTime() - bDate.getTime()
+      }
+      
+      return 0
+    })
 
     // Log search for analytics
     if (query || location) {
@@ -191,10 +241,11 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        events: allEvents,
-        total: allEvents.length,
+        events: sortedEvents.slice(0, limit),
+        total: sortedEvents.length,
         sources: {
           seatgeek: seatgeekEvents.length,
+          ticketmaster: ticketmasterEvents.length,
           database: processedEvents.length,
           mock: mockEvents.length
         }

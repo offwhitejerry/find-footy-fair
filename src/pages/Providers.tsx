@@ -10,8 +10,10 @@ import AdminMeta from "@/components/AdminMeta";
 
 const Providers = () => {
   const [seatgeekEnabled, setSeatgeekEnabled] = useState(true);
+  const [ticketmasterEnabled, setTicketmasterEnabled] = useState(false);
   const [providerStatus, setProviderStatus] = useState({
     seatgeek: 'checking',
+    ticketmaster: 'checking',
     database: 'active',
     mock: 'active'
   });
@@ -42,7 +44,31 @@ const Providers = () => {
       }
     };
 
+    // Check Ticketmaster status
+    const checkTicketmasterStatus = async () => {
+      try {
+        const response = await fetch('/api/functions/v1/ticketmaster-adapter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: 'test', limit: 1 }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.events && Array.isArray(data.events)) {
+          setProviderStatus(prev => ({ ...prev, ticketmaster: 'active' }));
+        } else {
+          setProviderStatus(prev => ({ ...prev, ticketmaster: 'missing_key' }));
+        }
+      } catch (error) {
+        setProviderStatus(prev => ({ ...prev, ticketmaster: 'error' }));
+      }
+    };
+
     checkSeatGeekStatus();
+    checkTicketmasterStatus();
   }, []);
 
   const getStatusIcon = (status: string) => {
@@ -180,6 +206,64 @@ const Providers = () => {
                 <div>
                   <div className="text-xs text-muted-foreground">Fee Structure</div>
                   <div className="text-sm font-medium">All-in Pricing</div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Ticketmaster */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    {getStatusIcon(providerStatus.ticketmaster)}
+                    <div>
+                      <h3 className="font-semibold">Ticketmaster</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Official tickets directly from Ticketmaster
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Badge variant={getStatusColor(providerStatus.ticketmaster)}>
+                    {getStatusText(providerStatus.ticketmaster)}
+                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="ticketmaster-toggle"
+                      checked={ticketmasterEnabled && providerStatus.ticketmaster === 'active'}
+                      onCheckedChange={setTicketmasterEnabled}
+                      disabled={providerStatus.ticketmaster === 'missing_key'}
+                    />
+                    <Label htmlFor="ticketmaster-toggle">Enable</Label>
+                  </div>
+                </div>
+              </div>
+              
+              {providerStatus.ticketmaster === 'missing_key' && (
+                <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-sm text-destructive">
+                    <strong>Configuration Required:</strong> Add TICKETMASTER_API_KEY to your environment variables to enable this provider.
+                  </p>
+                </div>
+              )}
+              
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
+                <div>
+                  <div className="text-xs text-muted-foreground">Reliability</div>
+                  <div className="text-sm font-medium">90%</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Avg Response</div>
+                  <div className="text-sm font-medium">300ms</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Delivery Methods</div>
+                  <div className="text-sm font-medium">Mobile, Paper</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Fee Structure</div>
+                  <div className="text-sm font-medium">Transparent</div>
                 </div>
               </div>
             </Card>
