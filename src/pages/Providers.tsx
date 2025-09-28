@@ -7,6 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { signOutAdmin } from "@/utils/adminAuth";
 import AdminMeta from "@/components/AdminMeta";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import { ticketmasterHealth } from "@/providers/ticketmaster";
 
 const Providers = () => {
   const [seatgeekEnabled, setSeatgeekEnabled] = useState(true);
@@ -47,22 +50,17 @@ const Providers = () => {
     // Check Ticketmaster status
     const checkTicketmasterStatus = async () => {
       try {
-        const response = await fetch('/api/functions/v1/ticketmaster-adapter', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query: 'test', limit: 1 }),
-        });
+        const health = await ticketmasterHealth();
         
-        const data = await response.json();
-        
-        if (data.events && Array.isArray(data.events)) {
+        if (health.hasKey && health.ok) {
           setProviderStatus(prev => ({ ...prev, ticketmaster: 'active' }));
-        } else {
+        } else if (!health.hasKey) {
           setProviderStatus(prev => ({ ...prev, ticketmaster: 'missing_key' }));
+        } else {
+          setProviderStatus(prev => ({ ...prev, ticketmaster: 'error' }));
         }
       } catch (error) {
+        console.warn('Ticketmaster health check error:', error);
         setProviderStatus(prev => ({ ...prev, ticketmaster: 'error' }));
       }
     };
@@ -88,9 +86,9 @@ const Providers = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Active';
+        return 'Key detected';
       case 'missing_key':
-        return 'Missing API Key (Disabled)';
+        return 'Key missing';
       case 'disabled':
         return 'Disabled';
       case 'error':

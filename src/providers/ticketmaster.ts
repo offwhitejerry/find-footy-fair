@@ -1,5 +1,6 @@
 import { appendSubIdToUrl, generateUUID } from '@/lib/utils'
 import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabase'
 
 export interface TicketmasterEvent {
   provider: 'Ticketmaster'
@@ -28,24 +29,36 @@ export interface SearchParams {
 
 export async function searchTicketmaster(params: SearchParams): Promise<TicketmasterEvent[]> {
   try {
-    // Call the Ticketmaster adapter edge function
-    const response = await fetch('/api/ticketmaster-adapter', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
-    })
-
-    if (!response.ok) {
-      throw new Error(`Ticketmaster adapter error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return data.events || []
+    const { data, error } = await supabase.functions.invoke("ticketmaster-adapter", { 
+      body: {
+        q: params.query,
+        city: params.location,
+        startDateTime: params.dateFrom,
+        endDateTime: params.dateTo
+      }
+    });
+    
+    if (error) throw error;
+    return (data?.results ?? []) as TicketmasterEvent[];
   } catch (error) {
     console.warn('tm_adapter_error:', error instanceof Error ? error.message : 'Unknown error')
+    // Show user-friendly toast for errors
+    if (typeof window !== 'undefined') {
+      const { toast } = await import('sonner');
+      toast.warning("Ticketmaster temporarily unavailable—showing other sources");
+    }
     return []
+  }
+}
+
+export async function ticketmasterHealth(): Promise<{ hasKey: boolean; ok: boolean }> {
+  try {
+    const { data, error } = await supabase.functions.invoke("ticketmaster-health");
+    if (error) return { hasKey: false, ok: false };
+    return data as { hasKey: boolean; ok: boolean };
+  } catch (error) {
+    console.warn('Ticketmaster health check error:', error);
+    return { hasKey: false, ok: false };
   }
 }
 
