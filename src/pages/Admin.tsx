@@ -1,21 +1,27 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ExternalLink, Settings } from "lucide-react";
+import { ArrowLeft, ExternalLink, Settings, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useGetClicks } from "@/hooks/useEvents";
+import { useGetClicks, useSeedSampleData } from "@/hooks/useEvents";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { site } from "@/config/site";
 import { setPageTitle } from "@/lib/head";
+import { useToast } from "@/hooks/use-toast";
 
 const Admin = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 50;
+  const { toast } = useToast();
   
   const { data, isLoading, error } = useGetClicks(pageSize, currentPage * pageSize);
+  const seedMutation = useSeedSampleData();
+  
+  // Check if sample data features should be visible
+  const showSampleData = import.meta.env.DEV || import.meta.env.VITE_ENABLE_SAMPLE_DATA === 'true';
   
   useEffect(() => {
     setPageTitle("Admin Dashboard");
@@ -26,6 +32,22 @@ const Admin = () => {
       style: "currency",
       currency: currency,
     }).format(price);
+  };
+
+  const handleSeedData = async () => {
+    try {
+      await seedMutation.mutateAsync();
+      toast({
+        title: "Sample data loaded",
+        description: "Football events and tickets have been added to the database.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load sample data. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -92,6 +114,32 @@ const Admin = () => {
               Required: VITE_APP_NAME, VITE_APP_DOMAIN. Optional: VITE_TAGLINE, VITE_CONTACT_EMAIL, VITE_TWITTER, VITE_INSTAGRAM
             </p>
           </Card>
+
+          {/* Dev Tools Section */}
+          {showSampleData && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Dev Tools</h2>
+              <div className="space-y-4">
+                <div>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleSeedData}
+                    disabled={seedMutation.isPending}
+                    className="gap-2"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {seedMutation.isPending ? "Loading..." : "Load Sample Data"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Click to populate with sample football events and tickets
+                  </p>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Available in development mode or when VITE_ENABLE_SAMPLE_DATA=true
+                </div>
+              </div>
+            </Card>
+          )}
 
           <div>
             <h1 className="text-3xl font-bold mb-2">Recent Clicks</h1>

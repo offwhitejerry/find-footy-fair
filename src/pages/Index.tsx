@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { Search, Calendar, MapPin, Users, Sparkles } from "lucide-react";
+import { Search, Calendar, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { useSeedSampleData } from "@/hooks/useEvents";
-import { useToast } from "@/hooks/use-toast";
 import { site } from "@/config/site";
 import { setPageTitle } from "@/lib/head";
 import popularUsData from "@/data/popular-us.json";
@@ -13,8 +11,6 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const seedMutation = useSeedSampleData();
 
   const enableInternational = import.meta.env.VITE_ENABLE_INTERNATIONAL === 'true';
 
@@ -42,21 +38,6 @@ const Index = () => {
     handleSearch();
   };
 
-  const handleSeedData = async () => {
-    try {
-      await seedMutation.mutateAsync();
-      toast({
-        title: "Sample data loaded",
-        description: "Football events and tickets have been added to the database.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load sample data. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const popularSearches = enableInternational ? [
     ...popularUsData,
@@ -123,21 +104,6 @@ const Index = () => {
             </div>
           </form>
 
-          {/* Sample Data Button */}
-          <div className="text-center mb-8">
-            <Button 
-              variant="outline" 
-              onClick={handleSeedData}
-              disabled={seedMutation.isPending}
-              className="gap-2"
-            >
-              <Sparkles className="h-4 w-4" />
-              {seedMutation.isPending ? "Loading..." : "Load Sample Data"}
-            </Button>
-            <p className="text-xs text-muted-foreground mt-2">
-              Click to populate with sample football events
-            </p>
-          </div>
 
           {/* Popular Searches */}
           <div className="mb-16">

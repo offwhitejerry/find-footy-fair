@@ -184,9 +184,12 @@ const Event = () => {
                   <h1 className="text-3xl font-bold mb-2">
                     {mockEvent.homeTeam} vs {mockEvent.awayTeam}
                   </h1>
-                  <Badge variant="secondary" className="mb-4">
-                    {mockEvent.competition}
-                  </Badge>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Badge variant="secondary">
+                      {mockEvent.competition}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">Demo data</Badge>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

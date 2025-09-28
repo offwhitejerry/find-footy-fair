@@ -179,6 +179,10 @@ const Results = () => {
                       <div className="md:col-span-2">
                         <div className="flex items-center space-x-3 mb-2">
                           <Badge variant="secondary">{event.competition || 'Football'}</Badge>
+                          {/* Demo data badge */}
+                          {event.external_id?.match(/^(MAN_UTD_ARS_|LIV_CHE_|MAN_CITY_TOT_)/) && (
+                            <Badge variant="outline" className="text-xs">Demo data</Badge>
+                          )}
                           <span className="text-sm text-muted-foreground">
                             {event.ticket_count || 0} tickets available
                           </span>
@@ -227,7 +231,7 @@ const Results = () => {
         {/* Legal Notice */}
         <div className="mt-8 p-4 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground">
-              Prices and availability may change. FootyFare compares prices from multiple providers 
+              Prices and availability may change. {site.name} compares prices from multiple providers 
               to help you find the best deals. We redirect to official ticket providers - we don't sell tickets directly.
               When fees are not provided by the provider, we estimate typical fees and clearly mark them.
             </p>
