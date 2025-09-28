@@ -1,4 +1,4 @@
-import { TICKETMASTER_PROVIDER, type TicketmasterEvent } from './ticketmaster'
+import { TICKETMASTER_PROVIDER, type TicketmasterEvent, fetchTicketmaster } from './ticketmaster'
 
 export interface Provider {
   name: string
@@ -35,6 +35,20 @@ export function getEnabledProviders(settings: ProviderSettings): Provider[] {
   }
   
   return enabled
+}
+
+export async function searchAll(params: any) {
+  const [tm] = await Promise.all([ fetchTicketmaster(params) ]);
+  const results = [...tm];
+  results.sort((a:any,b:any)=>{
+    const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
+    const bp=b?.price?.total ?? Number.POSITIVE_INFINITY;
+    if(ap!==bp) return ap-bp;
+    const ad=a?.dateTime?Date.parse(a.dateTime):Number.POSITIVE_INFINITY;
+    const bd=b?.dateTime?Date.parse(b.dateTime):Number.POSITIVE_INFINITY;
+    return ad-bd;
+  });
+  return results;
 }
 
 export function sortEventsByRelevance(events: EventType[]): EventType[] {

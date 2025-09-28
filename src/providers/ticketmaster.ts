@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/supabase";
 import { appendSubIdToUrl, generateUUID } from '@/lib/utils'
 import { api } from '@/lib/api'
 
@@ -18,12 +19,20 @@ export interface TicketmasterEvent {
   id: string
 }
 
+export type TMParams = { q?: string; city?: string; startDateTime?: string; endDateTime?: string };
+
 export interface SearchParams {
   query?: string
   location?: string
   dateFrom?: string
   dateTo?: string
   limit?: number
+}
+
+export async function fetchTicketmaster(params: TMParams) {
+  const { data, error } = await supabase.functions.invoke("ticketmaster-adapter", { body: params });
+  if (error) return [];
+  return (data?.results ?? []) as any[];
 }
 
 export async function searchTicketmaster(params: SearchParams): Promise<TicketmasterEvent[]> {
@@ -58,7 +67,13 @@ export async function searchTicketmaster(params: SearchParams): Promise<Ticketma
   }
 }
 
-export async function ticketmasterHealth(): Promise<{ hasKey: boolean; ok: boolean }> {
+export async function ticketmasterHealth() {
+  const { data, error } = await supabase.functions.invoke("ticketmaster-health", { method: "GET" as any });
+  if (error) return { hasKey: false, ok: false };
+  return data as { hasKey: boolean; ok: boolean };
+}
+
+export async function ticketmasterHealthLegacy(): Promise<{ hasKey: boolean; ok: boolean }> {
   try {
     const response = await fetch('/api/functions/v1/ticketmaster-health', {
       method: 'GET',
