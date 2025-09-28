@@ -12,6 +12,7 @@ interface SearchParams {
   dateFrom?: string;
   dateTo?: string;
   limit?: number;
+  league?: string;
 }
 
 serve(async (req) => {
@@ -25,7 +26,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
-    const { query, location, dateFrom, dateTo, limit = 20 }: SearchParams = await req.json()
+    const { query, location, dateFrom, dateTo, limit = 20, league }: SearchParams = await req.json()
+
+    // US leagues for filtering
+    const US_LEAGUES = ['MLS', 'USL Championship', 'USL League One', 'NWSL']
+    const enableInternational = Deno.env.get('VITE_ENABLE_INTERNATIONAL') === 'true'
 
     // Try SeatGeek first if API key is available
     let seatgeekEvents = []
@@ -38,7 +43,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
         },
-        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 2) })
+        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 2), league })
       })
       
       if (seatgeekResponse.ok) {
@@ -89,6 +94,14 @@ serve(async (req) => {
 
     if (dateTo) {
       searchQuery = searchQuery.lte('event_date', dateTo)
+    }
+
+    // Add league filtering
+    if (league && US_LEAGUES.includes(league)) {
+      searchQuery = searchQuery.eq('league', league)
+    } else if (!enableInternational) {
+      // Default to US leagues only if international is disabled
+      searchQuery = searchQuery.in('league', US_LEAGUES)
     }
 
     const { data: events, error } = await searchQuery

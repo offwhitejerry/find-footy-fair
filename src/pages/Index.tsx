@@ -7,6 +7,7 @@ import { useSeedSampleData } from "@/hooks/useEvents";
 import { useToast } from "@/hooks/use-toast";
 import { site } from "@/config/site";
 import { setPageTitle } from "@/lib/head";
+import popularUsData from "@/data/popular-us.json";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,20 +16,30 @@ const Index = () => {
   const { toast } = useToast();
   const seedMutation = useSeedSampleData();
 
+  const enableInternational = import.meta.env.VITE_ENABLE_INTERNATIONAL === 'true';
+
   useEffect(() => {
     setPageTitle();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
+  const handleSearch = (searchTerm?: string, searchLeague?: string) => {
+    const query = searchTerm || searchQuery;
+    if (query.trim()) {
       const params = new URLSearchParams();
-      params.set('query', searchQuery);
+      params.set('query', query);
       if (location.trim()) {
         params.set('location', location);
       }
+      if (searchLeague) {
+        params.set('league', searchLeague);
+      }
       navigate(`/results?${params.toString()}`);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch();
   };
 
   const handleSeedData = async () => {
@@ -47,13 +58,10 @@ const Index = () => {
     }
   };
 
-  const popularSearches = [
-    "Real Madrid vs Barcelona",
-    "Premier League",
-    "Champions League Final",
-    "Manchester United",
-    "Liverpool FC"
-  ];
+  const popularSearches = enableInternational ? [
+    ...popularUsData,
+    // International teams would be added here when enabled
+  ] : popularUsData;
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,7 +90,7 @@ const Index = () => {
           )}
 
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="mb-12">
+          <form onSubmit={handleFormSubmit} className="mb-12">
             <div className="flex gap-4 max-w-4xl mx-auto">
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -135,13 +143,16 @@ const Index = () => {
           <div className="mb-16">
             <p className="text-muted-foreground mb-4">Popular searches:</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {popularSearches.map((search, index) => (
+              {popularSearches.map((search) => (
                 <button
-                  key={index}
-                  onClick={() => setSearchQuery(search)}
-                  className="px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm hover:bg-accent/80 transition-colors"
+                  key={search.slug}
+                  onClick={() => handleSearch(search.label, search.league)}
+                  className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm hover:bg-accent/80 transition-colors"
                 >
-                  {search}
+                  <span>{search.label}</span>
+                  <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
+                    {search.league}
+                  </span>
                 </button>
               ))}
             </div>
@@ -225,6 +236,13 @@ const Index = () => {
                   onClick={() => navigate('/admin')}
                 >
                   View Clicks
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate('/content')}
+                >
+                  Content
                 </Button>
                 <Button 
                   variant="link" 

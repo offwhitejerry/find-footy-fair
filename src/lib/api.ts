@@ -51,6 +51,7 @@ export interface SearchParams {
   dateFrom?: string
   dateTo?: string
   limit?: number
+  league?: string
 }
 
 export interface TicketFilters {

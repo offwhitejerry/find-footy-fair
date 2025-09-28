@@ -55,6 +55,7 @@ interface SearchParams {
   dateFrom?: string
   dateTo?: string
   limit?: number
+  league?: string
 }
 
 interface EventWithTickets {
@@ -114,7 +115,11 @@ serve(async (req) => {
       )
     }
 
-    const { query, location, dateFrom, dateTo, limit = 20 }: SearchParams = await req.json()
+    const { query, location, dateFrom, dateTo, limit = 20, league }: SearchParams = await req.json()
+
+    // Define US leagues for filtering
+    const US_LEAGUES = ['MLS', 'USL Championship', 'USL League One', 'NWSL']
+    const enableInternational = Deno.env.get('VITE_ENABLE_INTERNATIONAL') === 'true'
 
     // Build SeatGeek API request
     const baseUrl = 'https://api.seatgeek.com/2/events'
@@ -191,6 +196,16 @@ serve(async (req) => {
         }
       ]
 
+      // Determine league based on team names and other factors
+      let eventLeague = 'MLS' // Default to MLS for now, could be enhanced with better logic
+      
+      // Simple league detection logic (in real app, this would be more sophisticated)
+      if (homeTeam.includes('FC') || awayTeam.includes('FC') || 
+          homeTeam.includes('United') || awayTeam.includes('United') ||
+          homeTeam.includes('City') || awayTeam.includes('City')) {
+        eventLeague = 'MLS'
+      }
+
       return {
         id: event.id,
         external_id: event.id,
@@ -200,7 +215,7 @@ serve(async (req) => {
         venue_address: event.venue?.address,
         event_date: event.datetime_local,
         competition: 'Football',
-        league: 'Various',
+        league: eventLeague,
         status: 'upcoming' as const,
         min_price: Math.min(...mockTickets.map(t => t.total_price)),
         max_price: Math.max(...mockTickets.map(t => t.total_price)),
@@ -213,8 +228,22 @@ serve(async (req) => {
       }
     }) || []
 
+    // Apply league filtering
+    let filteredEvents = mappedEvents
+    
+    // If a specific league is requested, filter by it
+    if (league && US_LEAGUES.includes(league)) {
+      filteredEvents = mappedEvents.filter((event: EventWithTickets) => event.league === league)
+    } 
+    // If no league specified but international is disabled, filter to US leagues only
+    else if (!enableInternational) {
+      filteredEvents = mappedEvents.filter((event: EventWithTickets) => 
+        US_LEAGUES.includes(event.league || 'MLS')
+      )
+    }
+
     // Sort by total price ascending, then by provider reliability and delivery speed
-    const sortedEvents = mappedEvents.map((event: EventWithTickets) => ({
+    const sortedEvents = filteredEvents.map((event: EventWithTickets) => ({
       ...event,
       tickets: event.tickets?.sort((a: TicketWithScores, b: TicketWithScores) => {
         // Primary: total price ascending

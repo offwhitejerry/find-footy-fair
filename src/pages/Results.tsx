@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useSearchEvents } from "@/hooks/useEvents";
+import { site } from "@/config/site";
 
 const Results = () => {
   const [sortBy, setSortBy] = useState("price");
@@ -16,12 +17,14 @@ const Results = () => {
   const location = searchParams.get('location') || '';
   const dateFrom = searchParams.get('dateFrom') || '';
   const dateTo = searchParams.get('dateTo') || '';
+  const league = searchParams.get('league') || '';
   
   const { data, isLoading, error } = useSearchEvents({
     query: searchQuery,
     location: location,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
+    league: league || undefined,
   });
 
   const formatPrice = (price: number, currency: string = "USD") => {
@@ -60,7 +63,7 @@ const Results = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <h1 className="text-xl font-bold text-primary">FootyFare</h1>
+              <h1 className="text-xl font-bold text-primary">{site.name}</h1>
             </div>
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm">

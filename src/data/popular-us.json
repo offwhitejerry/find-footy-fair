@@ -1,0 +1,12 @@
+[
+  { "label": "LAFC vs Inter Miami", "league": "MLS", "slug": "lafc-vs-inter-miami" },
+  { "label": "Seattle Sounders", "league": "MLS", "slug": "seattle-sounders" },
+  { "label": "Sacramento Republic FC", "league": "USL Championship", "slug": "sacramento-republic" },
+  { "label": "Chattanooga Red Wolves", "league": "USL League One", "slug": "chattanooga-red-wolves" },
+  { "label": "Portland Thorns", "league": "NWSL", "slug": "portland-thorns" },
+  { "label": "Atlanta United", "league": "MLS", "slug": "atlanta-united" },
+  { "label": "Angel City FC", "league": "NWSL", "slug": "angel-city-fc" },
+  { "label": "Phoenix Rising FC", "league": "USL Championship", "slug": "phoenix-rising" },
+  { "label": "Austin FC", "league": "MLS", "slug": "austin-fc" },
+  { "label": "OL Reign", "league": "NWSL", "slug": "ol-reign" }
+]
