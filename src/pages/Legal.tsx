@@ -157,8 +157,24 @@ const Legal = () => {
               <div className="space-y-2">
                 {site.contactEmail ? (
                   <>
-                    <p><strong>Email:</strong> {site.contactEmail}</p>
-                    <p><strong>Support:</strong> {site.contactEmail}</p>
+                    <p>
+                      <strong>Email:</strong>{' '}
+                      <a 
+                        href={`mailto:${site.contactEmail}`}
+                        className="text-primary hover:underline"
+                      >
+                        {site.contactEmail}
+                      </a>
+                    </p>
+                    <p>
+                      <strong>Support:</strong>{' '}
+                      <a 
+                        href={`mailto:${site.contactEmail}`}
+                        className="text-primary hover:underline"
+                      >
+                        {site.contactEmail}
+                      </a>
+                    </p>
                   </>
                 ) : (
                   <p>Contact information will be added soon.</p>

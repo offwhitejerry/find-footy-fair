@@ -110,7 +110,19 @@ const Privacy = () => {
                 <li><strong>Opt-out:</strong> Disable cookies through your browser settings</li>
               </ul>
               <p>
-                To exercise these rights, {site.contactEmail ? `contact us at ${site.contactEmail}` : "contact information will be added soon."}
+                To exercise these rights, {site.contactEmail ? (
+                  <>
+                    contact us at{' '}
+                    <a 
+                      href={`mailto:${site.contactEmail}`}
+                      className="text-primary hover:underline"
+                    >
+                      {site.contactEmail}
+                    </a>
+                  </>
+                ) : (
+                  "contact information will be added soon."
+                )}
               </p>
             </div>
           </Card>
@@ -141,8 +153,24 @@ const Privacy = () => {
               <div className="space-y-2">
                 {site.contactEmail ? (
                   <>
-                    <p><strong>Email:</strong> {site.contactEmail}</p>
-                    <p><strong>General Support:</strong> {site.contactEmail}</p>
+                    <p>
+                      <strong>Email:</strong>{' '}
+                      <a 
+                        href={`mailto:${site.contactEmail}`}
+                        className="text-primary hover:underline"
+                      >
+                        {site.contactEmail}
+                      </a>
+                    </p>
+                    <p>
+                      <strong>General Support:</strong>{' '}
+                      <a 
+                        href={`mailto:${site.contactEmail}`}
+                        className="text-primary hover:underline"
+                      >
+                        {site.contactEmail}
+                      </a>
+                    </p>
                   </>
                 ) : (
                   <p>Contact information will be added soon.</p>
