@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { appendSubIdToUrl, generateUUID } from '@/lib/utils'
 import { api } from '@/lib/api'
 
