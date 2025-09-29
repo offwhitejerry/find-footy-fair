@@ -179,9 +179,17 @@ const Results = () => {
                       <div className="md:col-span-2">
                         <div className="flex items-center space-x-3 mb-2">
                           <Badge variant="secondary">{event.competition || 'Football'}</Badge>
+                          {/* Provider badge */}
+                          {event.provider && (
+                            <Badge variant="outline" className="text-xs">{event.provider}</Badge>
+                          )}
                           {/* Demo data badge */}
                           {event.external_id?.match(/^(MAN_UTD_ARS_|LIV_CHE_|MAN_CITY_TOT_)/) && (
                             <Badge variant="outline" className="text-xs">Demo data</Badge>
+                          )}
+                          {/* Price on site chip */}
+                          {event.price?.total === null && (
+                            <Badge variant="outline" className="text-xs">Price on site</Badge>
                           )}
                           <span className="text-sm text-muted-foreground">
                             {event.ticket_count || 0} tickets available
@@ -214,10 +222,26 @@ const Results = () => {
                       <div className="md:text-right">
                         <p className="text-sm text-muted-foreground mb-1">From</p>
                         <p className="font-bold text-xl text-primary">
-                          {event.min_price ? formatPrice(event.min_price) : 'TBA'}
+                          {event.price?.total !== null 
+                            ? formatPrice(event.price.total, event.price.currency) 
+                            : event.min_price 
+                              ? formatPrice(event.min_price) 
+                              : 'TBA'
+                          }
                         </p>
-                        <Button className="mt-2 w-full md:w-auto">
-                          View Tickets
+                        <Button 
+                          className="mt-2 w-full md:w-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (event.provider === 'Ticketmaster' && event.deepLink) {
+                              const id = crypto.randomUUID();
+                              const u = new URL(event.deepLink);
+                              u.searchParams.set("subid", id);
+                              window.location.href = u.toString();
+                            }
+                          }}
+                        >
+                          {event.provider === 'Ticketmaster' ? 'Buy on Ticketmaster' : 'View Tickets'}
                         </Button>
                       </div>
                     </div>

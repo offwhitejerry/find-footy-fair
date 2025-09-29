@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { appendSubIdToUrl, generateUUID } from '@/lib/utils'
 import { api } from '@/lib/api'
 
@@ -29,9 +29,12 @@ export interface SearchParams {
   limit?: number
 }
 
-export async function fetchTicketmaster(params: { q?: string; city?: string; startDateTime?: string; endDateTime?: string }) {
+export async function fetchTicketmaster(params: TMParams) {
   const { data, error } = await supabase.functions.invoke("ticketmaster-adapter", { body: params });
-  if (error) throw new Error(`tm_invoke_error:${error.message || "unknown"}`);
+  if (error) { 
+    console.warn("tm_invoke_error", error); 
+    return []; 
+  }
   return (data?.results ?? []) as any[];
 }
 
@@ -57,6 +60,12 @@ export async function searchTicketmaster(params: SearchParams): Promise<Ticketma
   }
 }
 
+function withSubid(url: string, subid: string) {
+  const u = new URL(url);
+  u.searchParams.set("subid", subid);
+  return u.toString();
+}
+
 export async function handleTicketmasterClick(event: TicketmasterEvent): Promise<void> {
   try {
     const clickId = generateUUID()
@@ -71,13 +80,14 @@ export async function handleTicketmasterClick(event: TicketmasterEvent): Promise
       provider_url: event.deepLink
     })
 
-    // Redirect with tracking
-    const trackedUrl = appendSubIdToUrl(event.deepLink, clickId, 'subid')
-    window.open(trackedUrl, '_blank')
+    // Redirect with tracking using subid
+    const id = crypto.randomUUID();
+    window.location.href = withSubid(event.deepLink, id);
   } catch (error) {
     console.error('Error logging Ticketmaster click:', error)
     // Still redirect even if logging fails
-    window.open(event.deepLink, '_blank')
+    const id = crypto.randomUUID();
+    window.location.href = withSubid(event.deepLink, id);
   }
 }
 
