@@ -1,31 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Filter, SortAsc, MapPin, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useSearchEvents } from "@/hooks/useEvents";
 import { site } from "@/config/site";
+import { searchAll } from "@/providers/searchAll";
 
 const Results = () => {
   const [sortBy, setSortBy] = useState("price");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [items, setItems] = useState<any[]>([]);
+  const [warn, setWarn] = useState<string|null>(null);
+  const [loading, setLoading] = useState(false);
   
   const searchQuery = searchParams.get('query') || '';
   const location = searchParams.get('location') || '';
   const dateFrom = searchParams.get('dateFrom') || '';
   const dateTo = searchParams.get('dateTo') || '';
   const league = searchParams.get('league') || '';
-  
-  const { data, isLoading, error: queryError } = useSearchEvents({
-    query: searchQuery,
-    location: location,
-    dateFrom: dateFrom || undefined,
-    dateTo: dateTo || undefined,
-    league: league || undefined,
-  });
+
+  useEffect(() => {
+    if (searchQuery) {
+      performSearch();
+    }
+  }, [searchQuery, location, dateFrom, dateTo, league]);
+
+  async function performSearch() {
+    setLoading(true); 
+    setWarn(null); 
+    setItems([]);
+    try {
+      const { results, warnings } = await searchAll({ 
+        q: searchQuery,
+        city: location,
+        startDateTime: dateFrom || undefined,
+        endDateTime: dateTo || undefined
+      });
+      setItems(results);
+      if (warnings.length) setWarn(`Ticket source: ${warnings.join("; ")}`);
+    } catch (e: any) {
+      setWarn(`Search error: ${e.message || e}`);
+    }
+    setLoading(false);
+  }
 
   const formatPrice = (price: number, currency: string = "USD") => {
     return new Intl.NumberFormat('en-US', {
@@ -49,9 +69,9 @@ const Results = () => {
     };
   };
 
-  const events = data?.events || [];
-  const totalResults = data?.total || 0;
-  const searchError = data?.error || null;
+  const events = items;
+  const totalResults = items.length;
+  const searchError = warn;
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,10 +134,10 @@ const Results = () => {
           {/* Error */}
           {searchError && (
             <div className="rounded bg-amber-100 text-amber-900 text-sm px-3 py-2 border border-amber-200">
-              ⚠️ Ticket source error: {searchError}
+              ⚠️ {searchError}
             </div>
           )}
-          {isLoading ? (
+          {loading ? (
             // Loading skeletons
             Array.from({ length: 3 }).map((_, i) => (
               <Card key={i} className="p-6">
@@ -141,18 +161,7 @@ const Results = () => {
                 </div>
               </Card>
             ))
-          ) : queryError ? (
-            <Card className="p-6 text-center">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="font-semibold mb-2">Error Loading Results</h3>
-              <p className="text-muted-foreground mb-4">
-                We couldn't load the search results. Please try again.
-              </p>
-              <Button onClick={() => window.location.reload()}>
-                Retry
-              </Button>
-            </Card>
-          ) : events.length === 0 ? (
+          ) : events.length === 0 && !loading && !searchError ? (
             <Card className="p-6 text-center">
               <h3 className="font-semibold mb-2">No Events Found</h3>
               <p className="text-muted-foreground mb-4">
@@ -173,88 +182,23 @@ const Results = () => {
                 </p>
               </div>
 
-              {events.map((event: any) => {
-                const datetime = formatDateTime(event.event_date);
-                return (
-                  <Card 
-                    key={event.id} 
-                    className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => navigate(`/event/${event.id}`)}
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                      {/* Event Info */}
-                      <div className="md:col-span-2">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <Badge variant="secondary">{event.competition || 'Football'}</Badge>
-                          {/* Provider badge */}
-                          {event.provider && (
-                            <Badge variant="outline" className="text-xs">{event.provider}</Badge>
-                          )}
-                          {/* Demo data badge */}
-                          {event.external_id?.match(/^(MAN_UTD_ARS_|LIV_CHE_|MAN_CITY_TOT_)/) && (
-                            <Badge variant="outline" className="text-xs">Demo data</Badge>
-                          )}
-                          {/* Price on site chip */}
-                          {event.price?.total === null && (
-                            <Badge variant="outline" className="text-xs">Price on site</Badge>
-                          )}
-                          <span className="text-sm text-muted-foreground">
-                            {event.ticket_count || 0} tickets available
-                          </span>
-                        </div>
-                        <h3 className="font-bold text-lg mb-1">
-                          {event.home_team} vs {event.away_team}
-                        </h3>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {event.venue}
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1" />
-                            {datetime.date} at {datetime.time}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* League */}
-                      <div className="text-sm">
-                        <p className="font-medium">{event.league || 'League TBA'}</p>
-                        <p className="text-muted-foreground">
-                          {event.status === 'upcoming' ? 'Upcoming' : event.status}
-                        </p>
-                      </div>
-
-                      {/* Price */}
-                      <div className="md:text-right">
-                        <p className="text-sm text-muted-foreground mb-1">From</p>
-                        <p className="font-bold text-xl text-primary">
-                          {event.price?.total !== null 
-                            ? formatPrice(event.price.total, event.price.currency) 
-                            : event.min_price 
-                              ? formatPrice(event.min_price) 
-                              : 'TBA'
-                          }
-                        </p>
-                        <Button 
-                          className="mt-2 w-full md:w-auto"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (event.provider === 'Ticketmaster' && event.deepLink) {
-                              const id = crypto.randomUUID();
-                              const u = new URL(event.deepLink);
-                              u.searchParams.set("subid", id);
-                              window.location.href = u.toString();
-                            }
-                          }}
-                        >
-                          {event.provider === 'Ticketmaster' ? 'Buy on Ticketmaster' : 'View Tickets'}
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
+              {events.map((it: any) => (
+                <a 
+                  key={it.id} 
+                  href={it.deepLink} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="border rounded p-3 hover:bg-gray-50 block"
+                >
+                  <div className="text-xs opacity-70">Ticketmaster</div>
+                  <div className="font-medium">{it.title}</div>
+                  <div className="text-sm">{it.venue}{it.city ? ` — ${it.city}` : ""}</div>
+                  <div className="text-sm">{new Date(it.dateTime).toLocaleString()}</div>
+                  {it.price?.total == null
+                    ? <span className="inline-block mt-1 text-xs bg-gray-200 px-2 py-0.5 rounded">Price on site</span>
+                    : <div className="mt-1 font-semibold">${it.price.total}</div>}
+                </a>
+              ))}
             </>
           )}
         </div>
