@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,254 +19,64 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'method_not_allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
+    const { query, location, dateFrom, dateTo, limit = 50 }: SearchParams = await req.json()
 
-    const { query, location, dateFrom, dateTo, limit = 20, league }: SearchParams = await req.json()
+    // Force using ONLY Ticketmaster adapter (debug)
+    let tm: any[] = []
+    let error: string | null = null
 
-    // US leagues for filtering
-    const US_LEAGUES = ['MLS', 'USL Championship', 'USL League One', 'NWSL']
-    const enableInternational = Deno.env.get('VITE_ENABLE_INTERNATIONAL') === 'true'
-
-    // Try SeatGeek first if API key is available
-    let seatgeekEvents = []
-    let seatgeekError = null
-    
     try {
-      const seatgeekResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/seatgeek-adapter`, {
+      const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ticketmaster-adapter`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
         },
-        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 3), league })
+        body: JSON.stringify({
+          q: query,
+          city: location,
+          startDateTime: dateFrom,
+          endDateTime: dateTo,
+        }),
       })
-      
-      if (seatgeekResponse.ok) {
-        const seatgeekData = await seatgeekResponse.json()
-        if (seatgeekData.events && seatgeekData.provider_status === 'active') {
-          seatgeekEvents = seatgeekData.events
+
+      if (resp.ok) {
+        const data = await resp.json()
+        if (data && Array.isArray(data.results)) {
+          tm = data.results
+        } else {
+          error = 'tm_bad_payload'
         }
+      } else {
+        error = `tm_http_${resp.status}`
       }
-    } catch (error) {
-      console.log('SeatGeek unavailable, using fallback')
-      seatgeekError = error
+    } catch (e) {
+      error = `tm_invoke_error:${e instanceof Error ? e.message : 'unknown'}`
     }
 
-    // Try Ticketmaster if API key is available
-    let ticketmasterEvents = []
-    let ticketmasterWarnings = []
-    
-    try {
-      const ticketmasterResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ticketmaster-adapter`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
-        },
-        body: JSON.stringify({ query, location, dateFrom, dateTo, limit: Math.floor(limit / 3), league })
-      })
-      
-      if (ticketmasterResponse.ok) {
-        const ticketmasterData = await ticketmasterResponse.json()
-        if (ticketmasterData.results) {
-          ticketmasterEvents = ticketmasterData.results
-        }
-      }
-    } catch (error) {
-      console.log('Ticketmaster unavailable, using fallback')
-      ticketmasterWarnings.push(`Ticketmaster temporarily unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-
-    // Build the search query
-    let searchQuery = supabase
-      .from('events')
-      .select(`
-        *,
-        tickets!inner(
-          id,
-          provider_id,
-          section,
-          price,
-          currency,
-          total_price,
-          delivery_type,
-          is_available,
-          providers(name, website_url)
-        )
-      `)
-      .eq('status', 'upcoming')
-      .eq('tickets.is_available', true)
-      .order('event_date', { ascending: true })
-      .limit(limit)
-
-    // Apply filters
-    if (query) {
-      searchQuery = searchQuery.or(`home_team.ilike.%${query}%,away_team.ilike.%${query}%,venue.ilike.%${query}%,competition.ilike.%${query}%`)
-    }
-
-    if (location) {
-      searchQuery = searchQuery.or(`venue.ilike.%${location}%,venue_address.ilike.%${location}%`)
-    }
-
-    if (dateFrom) {
-      searchQuery = searchQuery.gte('event_date', dateFrom)
-    }
-
-    if (dateTo) {
-      searchQuery = searchQuery.lte('event_date', dateTo)
-    }
-
-    // Add league filtering
-    if (league && US_LEAGUES.includes(league)) {
-      searchQuery = searchQuery.eq('league', league)
-    } else if (!enableInternational) {
-      // Default to US leagues only if international is disabled
-      searchQuery = searchQuery.in('league', US_LEAGUES)
-    }
-
-    const { data: events, error } = await searchQuery
-
-    if (error) {
-      throw error
-    }
-
-    // Process results to include ticket aggregation
-    const processedEvents = events?.map(event => {
-      const tickets = event.tickets || []
-      const availableTickets = tickets.filter((t: any) => t.is_available)
-      
-      const minPrice = availableTickets.length > 0 
-        ? Math.min(...availableTickets.map((t: any) => t.total_price))
-        : null
-
-      const ticketCount = availableTickets.length
-      
-      const providerCounts = availableTickets.reduce((acc: Record<string, number>, ticket: any) => {
-        const providerName = ticket.providers?.name || 'Unknown'
-        acc[providerName] = (acc[providerName] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-
-      return {
-        ...event,
-        min_price: minPrice,
-        ticket_count: ticketCount,
-        provider_summary: providerCounts,
-        tickets: undefined // Remove detailed tickets from main response
-      }
-    }) || []
-
-    // Add mock events as fallback if no results
-    const mockEvents = processedEvents.length === 0 && seatgeekEvents.length === 0 && ticketmasterEvents.length === 0 ? [
-      {
-        id: 'mock-1',
-        external_id: 'mock-1',
-        home_team: 'Arsenal',
-        away_team: 'Chelsea',
-        venue: 'Emirates Stadium',
-        venue_address: 'London, UK',
-        event_date: new Date(Date.now() + 86400000 * 7).toISOString(), // Next week
-        competition: 'Premier League',
-        league: 'Premier League',
-        status: 'upcoming',
-        min_price: 45,
-        ticket_count: 8,
-        provider_summary: { 'Mock Provider': 8 },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: 'mock-2',
-        external_id: 'mock-2',
-        home_team: 'Manchester United',
-        away_team: 'Liverpool',
-        venue: 'Old Trafford',
-        venue_address: 'Manchester, UK',
-        event_date: new Date(Date.now() + 86400000 * 14).toISOString(), // In 2 weeks
-        competition: 'Premier League',
-        league: 'Premier League',
-        status: 'upcoming',
-        min_price: 85,
-        ticket_count: 12,
-        provider_summary: { 'Mock Provider': 12 },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-    ] : []
-
-    // Combine all provider results, add mocks if needed
-    const allEvents = [...seatgeekEvents, ...ticketmasterEvents, ...processedEvents, ...mockEvents]
-
-    // Sort events by price and date
-    const sortedEvents = allEvents.sort((a, b) => {
-      // First sort by price (nulls last)
-      if (a.price?.total !== null && b.price?.total !== null) {
-        const priceDiff = a.price.total - b.price.total
-        if (priceDiff !== 0) return priceDiff
-      } else if (a.min_price !== null && b.min_price !== null) {
-        const priceDiff = a.min_price - b.min_price
-        if (priceDiff !== 0) return priceDiff
-      } else if ((a.price?.total || a.min_price) !== null && (b.price?.total || b.min_price) === null) {
-        return -1
-      } else if ((a.price?.total || a.min_price) === null && (b.price?.total || b.min_price) !== null) {
-        return 1
-      }
-      
-      // Then sort by date
-      const aDate = new Date(a.dateTime || a.event_date)
-      const bDate = new Date(b.dateTime || b.event_date)
-      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
-        return aDate.getTime() - bDate.getTime()
-      }
-      
-      return 0
+    // Sort: priced first, then earliest date
+    tm.sort((a: any, b: any) => {
+      const ap = a?.price?.total ?? Number.POSITIVE_INFINITY
+      const bp = b?.price?.total ?? Number.POSITIVE_INFINITY
+      if (ap !== bp) return ap - bp
+      const ad = a?.dateTime ? Date.parse(a.dateTime) : Number.POSITIVE_INFINITY
+      const bd = b?.dateTime ? Date.parse(b.dateTime) : Number.POSITIVE_INFINITY
+      return ad - bd
     })
 
-    // Log search for analytics
-    if (query || location) {
-      await supabase.from('search_history').insert({
-        search_query: query || '',
-        location: location || null,
-        date_from: dateFrom || null,
-        date_to: dateTo || null,
-        results_count: processedEvents.length,
-        user_ip: req.headers.get('x-forwarded-for') || 'unknown'
-      })
-    }
-
-    // Collect all warnings
-    const allWarnings = [...ticketmasterWarnings];
-
     return new Response(
-      JSON.stringify({ 
-        events: sortedEvents.slice(0, limit),
-        total: sortedEvents.length,
-        warnings: allWarnings,
-        sources: {
-          seatgeek: seatgeekEvents.length,
-          ticketmaster: ticketmasterEvents.length,
-          database: processedEvents.length,
-          mock: mockEvents.length
-        }
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      },
+      JSON.stringify({ events: tm, total: tm.length, error }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 },
     )
-
-  } catch (error) {
-    console.error('Search error:', error)
+  } catch (e) {
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
-      },
+      JSON.stringify({ events: [], total: 0, error: e instanceof Error ? e.message : 'Unknown error' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 },
     )
   }
 })
