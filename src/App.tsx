@@ -15,6 +15,7 @@ import AdminSettings from "./pages/AdminSettings";
 import Content from "./pages/Content";
 import Providers from "./pages/Providers";
 import NotFound from "./pages/NotFound";
+import Debug from "./pages/Debug";
 import AdminGate from "./components/AdminGate";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/admin/providers" element={<AdminGate><Providers /></AdminGate>} />
           <Route path="/admin/settings" element={<AdminGate><AdminSettings /></AdminGate>} />
           <Route path="/content" element={<Content />} />
+          <Route path="/debug" element={<Debug />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

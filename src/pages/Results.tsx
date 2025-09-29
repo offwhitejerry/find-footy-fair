@@ -19,7 +19,7 @@ const Results = () => {
   const dateTo = searchParams.get('dateTo') || '';
   const league = searchParams.get('league') || '';
   
-  const { data, isLoading, error } = useSearchEvents({
+  const { data, isLoading, error: queryError } = useSearchEvents({
     query: searchQuery,
     location: location,
     dateFrom: dateFrom || undefined,
@@ -51,7 +51,7 @@ const Results = () => {
 
   const events = data?.events || [];
   const totalResults = data?.total || 0;
-  const warnings = data?.warnings || [];
+  const searchError = data?.error || null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,10 +111,10 @@ const Results = () => {
 
         {/* Results */}
         <div className="space-y-4">
-          {/* Warnings */}
-          {warnings.length > 0 && (
+          {/* Error */}
+          {searchError && (
             <div className="rounded bg-amber-100 text-amber-900 text-sm px-3 py-2 border border-amber-200">
-              ⚠️ Ticket source warning: {warnings.join("; ")}
+              ⚠️ Ticket source error: {searchError}
             </div>
           )}
           {isLoading ? (
@@ -141,7 +141,7 @@ const Results = () => {
                 </div>
               </Card>
             ))
-          ) : error ? (
+          ) : queryError ? (
             <Card className="p-6 text-center">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="font-semibold mb-2">Error Loading Results</h3>

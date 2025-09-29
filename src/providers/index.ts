@@ -1,4 +1,4 @@
-import { TICKETMASTER_PROVIDER, type TicketmasterEvent, fetchTicketmaster } from './ticketmaster'
+import { fetchTicketmaster } from './ticketmaster'
 
 export interface Provider {
   name: string
@@ -8,11 +8,9 @@ export interface Provider {
   handleClick: (event: any) => Promise<void>
 }
 
-export const PROVIDERS: Record<string, Provider> = {
-  ticketmaster: TICKETMASTER_PROVIDER
-}
+export const PROVIDERS: Record<string, Provider> = {}
 
-export type EventType = TicketmasterEvent
+export type EventType = any
 
 // Provider settings that can be controlled by admin
 export interface ProviderSettings {
@@ -38,27 +36,21 @@ export function getEnabledProviders(settings: ProviderSettings): Provider[] {
 }
 
 export async function searchAll(params: any) {
-  const warnings: string[] = [];
-  const results: any[] = [];
-  
   try {
     const tm = await fetchTicketmaster(params);
-    results.push(...tm);
-  } catch (e: any) {
-    warnings.push(String(e?.message || e));
+    // sort: priced first, then earliest date
+    tm.sort((a:any,b:any)=>{
+      const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
+      const bp=b?.price?.total ?? Number.POSITIVE_INFINITY;
+      if(ap!==bp) return ap-bp;
+      const ad=a?.dateTime?Date.parse(a.dateTime):Number.POSITIVE_INFINITY;
+      const bd=b?.dateTime?Date.parse(b.dateTime):Number.POSITIVE_INFINITY;
+      return ad-bd;
+    });
+    return { results: tm, error: null };
+  } catch (e:any) {
+    return { results: [], error: String(e?.message || e) };
   }
-  
-  // Sort: priced first, then soonest date
-  results.sort((a:any,b:any)=>{
-    const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
-    const bp=b?.price?.total ?? Number.POSITIVE_INFINITY;
-    if(ap!==bp) return ap-bp;
-    const ad=a?.dateTime?Date.parse(a.dateTime):Number.POSITIVE_INFINITY;
-    const bd=b?.dateTime?Date.parse(b.dateTime):Number.POSITIVE_INFINITY;
-    return ad-bd;
-  });
-  
-  return { results, warnings };
 }
 
 export function sortEventsByRelevance(events: EventType[]): EventType[] {
