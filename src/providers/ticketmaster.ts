@@ -31,10 +31,7 @@ export interface SearchParams {
 
 export async function fetchTicketmaster(params: TMParams) {
   const { data, error } = await supabase.functions.invoke("ticketmaster-adapter", { body: params });
-  if (error) { 
-    console.warn("tm_invoke_error", error); 
-    return []; 
-  }
+  if (error) throw new Error(`tm_invoke_error:${error.message || error.name || "unknown"}`);
   return (data?.results ?? []) as any[];
 }
 

@@ -38,8 +38,17 @@ export function getEnabledProviders(settings: ProviderSettings): Provider[] {
 }
 
 export async function searchAll(params: any) {
-  const tm = await fetchTicketmaster(params);
-  const results = [...tm];
+  const warnings: string[] = [];
+  const results: any[] = [];
+  
+  try {
+    const tm = await fetchTicketmaster(params);
+    results.push(...tm);
+  } catch (e: any) {
+    warnings.push(String(e?.message || e));
+  }
+  
+  // Sort: priced first, then soonest date
   results.sort((a:any,b:any)=>{
     const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
     const bp=b?.price?.total ?? Number.POSITIVE_INFINITY;
@@ -48,7 +57,8 @@ export async function searchAll(params: any) {
     const bd=b?.dateTime?Date.parse(b.dateTime):Number.POSITIVE_INFINITY;
     return ad-bd;
   });
-  return results;
+  
+  return { results, warnings };
 }
 
 export function sortEventsByRelevance(events: EventType[]): EventType[] {

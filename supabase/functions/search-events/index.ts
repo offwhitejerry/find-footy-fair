@@ -59,7 +59,7 @@ serve(async (req) => {
 
     // Try Ticketmaster if API key is available
     let ticketmasterEvents = []
-    let ticketmasterError = null
+    let ticketmasterWarnings = []
     
     try {
       const ticketmasterResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ticketmaster-adapter`, {
@@ -73,13 +73,13 @@ serve(async (req) => {
       
       if (ticketmasterResponse.ok) {
         const ticketmasterData = await ticketmasterResponse.json()
-        if (ticketmasterData.events) {
-          ticketmasterEvents = ticketmasterData.events
+        if (ticketmasterData.results) {
+          ticketmasterEvents = ticketmasterData.results
         }
       }
     } catch (error) {
       console.log('Ticketmaster unavailable, using fallback')
-      ticketmasterError = error
+      ticketmasterWarnings.push(`Ticketmaster temporarily unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
 
     // Build the search query
@@ -239,10 +239,14 @@ serve(async (req) => {
       })
     }
 
+    // Collect all warnings
+    const allWarnings = [...ticketmasterWarnings];
+
     return new Response(
       JSON.stringify({ 
         events: sortedEvents.slice(0, limit),
         total: sortedEvents.length,
+        warnings: allWarnings,
         sources: {
           seatgeek: seatgeekEvents.length,
           ticketmaster: ticketmasterEvents.length,
