@@ -9,10 +9,11 @@ import { signOutAdmin } from "@/utils/adminAuth";
 import AdminMeta from "@/components/AdminMeta";
 import { toast } from "sonner";
 import { ticketmasterHealth } from "@/providers/ticketmasterHealth";
+import { loadPrefs, savePrefs, type ProviderPrefs } from "@/lib/providerPrefs";
 
 const Providers = () => {
+  const [prefs, setPrefs] = useState<ProviderPrefs>(loadPrefs());
   const [seatgeekEnabled, setSeatgeekEnabled] = useState(true);
-  const [ticketmasterEnabled, setTicketmasterEnabled] = useState(false);
   const [tmHealth, setTmHealth] = useState<{hasKey:boolean; ok:boolean} | null>(null);
   const [providerStatus, setProviderStatus] = useState({
     seatgeek: 'checking',
@@ -22,6 +23,8 @@ const Providers = () => {
   });
 
   useEffect(() => {
+    setPrefs(loadPrefs()); // hydrate from localStorage on mount
+    
     // Check SeatGeek status
     const checkSeatGeekStatus = async () => {
       try {
@@ -100,6 +103,12 @@ const Providers = () => {
       default:
         return 'Unknown';
     }
+  };
+
+  const onToggleTicketmaster = (next: boolean) => {
+    const updated = { ...prefs, ticketmaster: next };
+    setPrefs(updated);
+    savePrefs(updated);
   };
 
   const getStatusColor = (status: string) => {
@@ -233,8 +242,8 @@ const Providers = () => {
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="ticketmaster-toggle"
-                      checked={ticketmasterEnabled}
-                      onCheckedChange={setTicketmasterEnabled}
+                      checked={!!prefs.ticketmaster}
+                      onCheckedChange={onToggleTicketmaster}
                     />
                     <Label htmlFor="ticketmaster-toggle">Enable</Label>
                   </div>

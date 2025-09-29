@@ -36,21 +36,32 @@ export function getEnabledProviders(settings: ProviderSettings): Provider[] {
 }
 
 export async function searchAll(params: any) {
-  try {
-    const tm = await fetchTicketmaster(params);
-    // sort: priced first, then earliest date
-    tm.sort((a:any,b:any)=>{
-      const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
-      const bp=b?.price?.total ?? Number.POSITIVE_INFINITY;
-      if(ap!==bp) return ap-bp;
-      const ad=a?.dateTime?Date.parse(a.dateTime):Number.POSITIVE_INFINITY;
-      const bd=b?.dateTime?Date.parse(b.dateTime):Number.POSITIVE_INFINITY;
-      return ad-bd;
-    });
-    return { results: tm, error: null };
-  } catch (e:any) {
-    return { results: [], error: String(e?.message || e) };
+  // Import loadPrefs here to avoid circular imports
+  const { loadPrefs } = await import('@/lib/providerPrefs');
+  const prefs = loadPrefs();
+  const results: any[] = [];
+  const warnings: string[] = [];
+
+  if (prefs.ticketmaster) {
+    try {
+      const tm = await fetchTicketmaster(params);
+      results.push(...tm);
+    } catch (e: any) {
+      warnings.push(`Ticketmaster: ${String(e?.message || e)}`);
+    }
   }
+
+  // sort: priced first, then earliest date
+  results.sort((a:any,b:any)=>{
+    const ap=a?.price?.total ?? Number.POSITIVE_INFINITY;
+    const bp=b?.price?.total ?? Number.POSITIVE_INFINITY;
+    if(ap!==bp) return ap-bp;
+    const ad=a?.dateTime?Date.parse(a.dateTime):Number.POSITIVE_INFINITY;
+    const bd=b?.dateTime?Date.parse(b.dateTime):Number.POSITIVE_INFINITY;
+    return ad-bd;
+  });
+
+  return { results, warnings };
 }
 
 export function sortEventsByRelevance(events: EventType[]): EventType[] {
