@@ -1,7 +1,14 @@
 import { loadPrefs } from "@/lib/providerPrefs";
 import { fetchTicketmaster } from "@/providers/ticketmaster";
 
-export async function searchAll(params: { q?: string; city?: string; startDateTime?: string; endDateTime?: string }) {
+export type SearchParams = {
+  q?: string;
+  city?: string;
+  startDateTime?: string;
+  endDateTime?: string;
+};
+
+export async function searchAll(params: SearchParams) {
   const prefs = loadPrefs();
   const results:any[] = [];
   const warnings:string[] = [];
