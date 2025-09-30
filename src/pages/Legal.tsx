@@ -39,7 +39,7 @@ const Legal = () => {
             <div className="space-y-4 text-sm">
               <p>
                 {site.name} is a ticket comparison service that helps users find and compare 
-                football ticket prices from multiple authorized providers. We are not a 
+                soccer ticket prices from multiple authorized providers. We are not a 
                 ticket marketplace and do not sell tickets directly.
               </p>
               <p>

@@ -38,7 +38,7 @@ const Privacy = () => {
             <h2 className="text-xl font-semibold mb-4">Information We Collect</h2>
             <div className="space-y-4 text-sm">
               <p>
-                {site.name} is a search and redirect service that helps you find football tickets. 
+                {site.name} is a search and redirect service that helps you find soccer tickets. 
                 We collect minimal information to provide our service:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">

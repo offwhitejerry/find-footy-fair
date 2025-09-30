@@ -63,13 +63,11 @@ const Index = () => {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
-            Find the <span className="text-primary">Cheapest</span> Football Tickets
+            Find the cheapest soccer tickets
           </h2>
-          {site.tagline && (
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              {site.tagline}
-            </p>
-          )}
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Compare prices for MLS, NWSL, and USL matches — click through to buy from our partners.
+          </p>
 
           {/* Search Form */}
           <form onSubmit={handleFormSubmit} className="mb-12">

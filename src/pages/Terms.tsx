@@ -39,7 +39,7 @@ const Terms = () => {
             <div className="space-y-4 text-sm">
               <p>
                 {site.name} is a <strong>search and redirect service</strong>, not a ticket marketplace. 
-                We help you find and compare football ticket prices from authorized providers but 
+                We help you find and compare soccer ticket prices from authorized providers but 
                 do not sell tickets directly.
               </p>
               <p>

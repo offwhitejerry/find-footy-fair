@@ -29,7 +29,7 @@ const Admin = () => {
       await seedMutation.mutateAsync();
       toast({
         title: "Sample data loaded",
-        description: "Football events and tickets have been added to the database.",
+        description: "Soccer events and tickets have been added to the database.",
       });
     } catch (error) {
       toast({
@@ -173,7 +173,7 @@ const Admin = () => {
                     {seedMutation.isPending ? "Loading..." : "Load Sample Data"}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Click to populate with sample football events and tickets
+                    Click to populate with sample soccer events and tickets
                   </p>
                 </div>
                 <div className="text-xs text-muted-foreground">
