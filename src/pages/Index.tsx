@@ -62,9 +62,9 @@ const Index = () => {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
-            Find the cheapest soccer tickets
-          </h2>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
+            Find the <span className="text-primary text-emerald-600 font-extrabold">Cheapest</span> Soccer Tickets
+          </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Compare prices for MLS, NWSL, and USL matches — click through to buy from our partners.
           </p>
